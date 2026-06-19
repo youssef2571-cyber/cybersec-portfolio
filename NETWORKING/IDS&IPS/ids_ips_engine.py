@@ -1,6 +1,7 @@
 """
 Custom IDS/IPS Engine
 Detects SYN Floods / Port Scans and dynamically updates firewall rules to block attackers.
+Forwards alerts to a centralized SIEM log file.
 Must be run with root privileges.
 """
 
@@ -8,8 +9,23 @@ from scapy.all import sniff, TCP, IP
 import os
 import time
 from collections import defaultdict
+import logging
 
-# --- Configuration ---
+# ==========================================
+#  SIEM INTEGRATION CONFIGURATION
+# ==========================================
+# Configures the IDS to write alerts to a shared central file
+# The format mimics the standard Linux Syslog format
+logging.basicConfig(
+    filename='../SOC_SIEM/central_syslog.log', # Relative path to the SIEM directory
+    level=logging.INFO,
+    format='%(asctime)s ids-sensor %(message)s',
+    datefmt='%b %d %H:%M:%S'
+)
+
+# ==========================================
+# ENGINE CONFIGURATION
+# ==========================================
 ALERT_THRESHOLD = 50  # Number of SYN packets before triggering a block
 TIME_WINDOW = 10      # Time window in seconds
 BLOCKED_IPS = set()   # Cache of already blocked IPs to prevent redundant firewall rules
@@ -41,11 +57,18 @@ def analyze_packet(packet):
             
             # Check if the connection rate exceeds our defined threshold
             if len(packet_tracker[src_ip]) > ALERT_THRESHOLD:
+                # 1. Print to local console
                 print(f"[ALERT] IDS DETECTED SYN Flood / Port Scan from {src_ip}")
+                
+                # 2. Forward to Central SIEM
+                logging.info(f"[IDS ALERT] Port Scan detected from {src_ip}")
+                
+                # 3. Trigger IPS Block
                 block_ip(src_ip)
 
 if __name__ == "__main__":
-    print("--- 🛡️ Starting Custom IDS/IPS Engine ---")
+    print("--- Starting Custom IDS/IPS Engine ---")
     print("Monitoring network traffic for anomalies...")
+    print("Forwarding alerts to: ../SOC_SIEM/central_syslog.log")
     # Sniff network traffic in real-time, discarding processed packets to save RAM (store=0)
     sniff(prn=analyze_packet, store=0)
