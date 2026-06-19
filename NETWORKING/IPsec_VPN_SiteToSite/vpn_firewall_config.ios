@@ -1,0 +1,65 @@
+! ==============================================================================
+! CISCO IOS SITE-TO-SITE IPSEC VPN & FIREWALL CONFIGURATION
+! Architecture: Secure interconnection between Site 1 (10.0.0.0/8) and Site 2 (30.0.0.0/8)
+! Target Device: Routeur1 (Gateway Site 1)
+! ==============================================================================
+
+! ------------------------------------------------------------------------------
+! STEP 1: FIREWALL & NAT CONFIGURATION (Traffic Filtering & Exemption)
+! ------------------------------------------------------------------------------
+! Define Access Control List (ACL) 100 to identify traffic for NAT.
+! CRITICAL: We MUST deny/exempt internal traffic destined for the remote site (30.0.0.0/8)
+! from being translated by NAT, so it can be captured by the crypto map instead.
+access-list 100 deny ip 10.0.0.0 0.255.255.255 30.0.0.0 0.255.255.255
+access-list 100 permit ip 10.0.0.0 0.255.255.255 any
+
+! Apply PAT (NAT Overload) on the WAN interface for general internet traffic
+ip nat inside source list 100 interface Serial 0/0/0 overload
+
+! ------------------------------------------------------------------------------
+! STEP 2: VPN PHASE 1 - ISAKMP POLICY (Key Exchange Negotiation)
+! ------------------------------------------------------------------------------
+crypto isakmp enable
+crypto isakmp policy 10
+ encryption aes        ! Use AES symmetric encryption for the tunnel negotiation
+ authentication pre-share ! Use a Pre-Shared Key (PSK) for peer authentication
+ hash sha              ! Use SHA-1 as the hashing algorithm
+ group 2               ! Diffie-Hellman Group 2 (1024-bit key exchange strength)
+ lifetime 86400        ! Security Association (SA) lifetime in seconds
+exit
+
+! Define the Pre-Shared Key and map it to the remote peer's public IP address
+crypto isakmp key CLESECRETE address 102.0.0.253
+
+! ------------------------------------------------------------------------------
+! STEP 3: VPN PHASE 2 - IPSEC CONFIGURATION (Data Encryption Method)
+! ------------------------------------------------------------------------------
+! Define the Transform-Set specifying data encryption (ESP-AES) and authentication (ESP-SHA-HMAC)
+crypto ipsec transform-set VPNLABO esp-aes esp-sha-hmac
+crypto ipsec security-association lifetime seconds 86400
+
+! Create an extended ACL to define "Interesting Traffic" that must be encrypted by the VPN
+ip access-list extended VPN
+ permit ip 10.0.0.0 0.255.255.255 30.0.0.0 0.255.255.255
+exit
+
+! ------------------------------------------------------------------------------
+! STEP 4: CRYPTO MAP BINDING & INTERFACE APPLICATION
+! ------------------------------------------------------------------------------
+crypto map CARTEVPN 10 ipsec-isakmp
+ set peer 102.0.0.253
+ set transform-set VPNLABO
+ match address VPN
+exit
+
+! Apply the firewall zones and crypto map to physical interfaces
+interface FastEthernet 0/0
+ description Internal LAN Interface
+ ip nat inside
+exit
+
+interface Serial 0/0/0
+ description WAN Interface (Connected to Internet)
+ ip nat outside
+ crypto map CARTEVPN
+exit
