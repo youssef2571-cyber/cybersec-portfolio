@@ -1,26 +1,26 @@
 #!/bin/bash
-# Simulates SSH brute force logs to test the Mini-SIEM Engine
+# Simulates a complex attack chain for the Advanced SIEM
 
-LOG_FILE="auth_simulated.log"
-ATTACKER_IP="192.168.10.105"
+LOG_FILE="central_syslog.log"
+ATTACKER_IP="10.0.0.99"
 
-# Create the file if it doesn't exist
 touch $LOG_FILE
+echo "Starting Advanced Attack Simulation (APT Scenario)..."
 
-echo "Starting attack simulation..."
-echo "Injecting logs into $LOG_FILE"
+# Step 1: The attacker scans the network (Triggering the Python IDS)
+echo "--> Injecting IDS Port Scan Alert"
+echo "$(date +"%b %d %H:%M:%S") ids-sensor [IDS ALERT] Port Scan detected from $ATTACKER_IP" >> $LOG_FILE
+sleep 2
 
-for i in {1..6}
-do
-    # Format of a standard Linux SSH failure log
-    TIMESTAMP=$(date +"%b %d %H:%M:%S")
-    LOG_ENTRY="$TIMESTAMP myserver sshd[12345]: Failed password for root from $ATTACKER_IP port 33452 ssh2"
-    
-    echo "$LOG_ENTRY" >> $LOG_FILE
-    echo "Sent: Failed login attempt $i"
-    
-    # Wait half a second between attempts
-    sleep 0.5
+# Step 2: The attacker tries to brute force SSH (Fails 3 times)
+echo "--> Injecting SSH Failures"
+for i in {1..3}; do
+    echo "$(date +"%b %d %H:%M:%S") server sshd: Failed password for admin from $ATTACKER_IP port 22" >> $LOG_FILE
+    sleep 1
 done
 
-echo "Simulation complete."
+# Step 3: The attacker finds the password and logs in successfully
+echo "--> Injecting SSH Success (Compromise)"
+echo "$(date +"%b %d %H:%M:%S") server sshd: Accepted password for admin from $ATTACKER_IP port 22" >> $LOG_FILE
+
+echo "Simulation complete. Check your SIEM dashboard!"
