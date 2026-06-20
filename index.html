@@ -1,107 +1,286 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Youssef Hadeg - Cybersecurity Portfolio</title>
-  <style>
-    body {
-      font-family: Arial;
-      margin: 0;
-      background: #0f172a;
-      color: white;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Youssef Hadeg | Security Engineer Portfolio</title>
+    <style>
+        /* Palette Cyberpunk & SOC Dashboard */
+        :root {
+            --bg: #050814;
+            --panel: #0b1220;
+            --neon: #00ff9d;
+            --cyan: #00d4ff;
+            --text: #cbd5e1;
+        }
 
-    header {
-      padding: 60px;
-      text-align: center;
-      background: #1e293b;
-    }
+        body {
+            margin: 0;
+            background-color: var(--bg);
+            /* Effet Background grid */
+            background-image: radial-gradient(circle, rgba(0, 255, 157, 0.15) 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: var(--text);
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            scroll-behavior: smooth;
+        }
 
-    h1 { margin: 0; font-size: 40px; }
-    p { color: #cbd5e1; }
+        /* Navbar style SOC dashboard */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background: rgba(10, 15, 28, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 255, 157, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
 
-    section {
-      padding: 40px;
-      max-width: 900px;
-      margin: auto;
-    }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--neon);
+            text-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
+            font-family: monospace;
+        }
 
-    .card {
-      background: #1e293b;
-      padding: 20px;
-      margin: 20px 0;
-      border-radius: 10px;
-    }
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 30px;
+            margin: 0;
+            padding: 0;
+        }
 
-    .tag {
-      display: inline-block;
-      background: #334155;
-      padding: 5px 10px;
-      margin: 5px;
-      border-radius: 5px;
-      font-size: 12px;
-    }
+        nav ul li {
+            cursor: pointer;
+            transition: color 0.3s;
+            font-weight: 500;
+            font-family: monospace;
+        }
 
-    a {
-      color: #38bdf8;
-    }
-  </style>
+        nav ul li:hover {
+            color: var(--cyan);
+            text-shadow: 0 0 8px var(--cyan);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 80px 20px 40px;
+        }
+
+        @keyframes glowText {
+            0% { text-shadow: 0 0 5px var(--cyan); }
+            100% { text-shadow: 0 0 20px var(--cyan), 0 0 30px var(--cyan); }
+        }
+
+        .hero h1 {
+            font-size: 52px;
+            color: var(--cyan);
+            animation: glowText 2s infinite alternate;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .hero p {
+            font-size: 20px;
+            margin-bottom: 40px;
+            color: #8fa3b0;
+        }
+
+        /* Effet "terminal hacker" */
+        .terminal-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 50px;
+        }
+
+        .terminal {
+            background: #000;
+            border: 1px solid var(--neon);
+            border-left: 5px solid var(--neon);
+            padding: 20px;
+            font-family: "Courier New", Courier, monospace;
+            box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
+            width: 100%;
+            max-width: 650px;
+            text-align: left;
+            border-radius: 4px;
+        }
+
+        .terminal p {
+            margin: 8px 0;
+        }
+
+        .prompt {
+            color: var(--neon);
+            font-weight: bold;
+        }
+
+        /* Layout Grid PRO */
+        .section-title {
+            text-align: center;
+            color: var(--text);
+            font-size: 28px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 20px 10%;
+            margin-bottom: 60px;
+        }
+
+        /* Animations WOW */
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(0, 255, 157, 0.2); }
+            50% { box-shadow: 0 0 20px rgba(0, 255, 157, 0.6); }
+            100% { box-shadow: 0 0 5px rgba(0, 255, 157, 0.2); }
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            padding: 30px;
+            border-radius: 12px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Bordure supérieure accentuée */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--neon);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            animation: glow 1.5s infinite;
+            border-color: var(--neon);
+        }
+
+        .card h3 {
+            color: var(--neon);
+            margin-top: 0;
+            font-size: 22px;
+        }
+
+        .card p {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #a0aec0;
+        }
+
+        .tech-stack {
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--cyan);
+            font-family: monospace;
+            font-weight: bold;
+        }
+        
+        .contact-btn {
+            background: transparent;
+            color: var(--neon);
+            border: 1px solid var(--neon);
+            padding: 10px 20px;
+            font-family: monospace;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            border-radius: 4px;
+        }
+        
+        .contact-btn:hover {
+            background: var(--neon);
+            color: #000;
+            box-shadow: 0 0 15px var(--neon);
+        }
+    </style>
 </head>
-
 <body>
 
-<header>
-  <h1>Youssef Hadeg</h1>
-  <p>Cybersecurity Student | Infrastructure Defense | SOC | Network Security</p>
-</header>
+    <nav>
+        <div class="logo">YH_SEC_LOGS</div>
+        <ul>
+            <li>> /home</li>
+            <li>> /projects</li>
+            <li>> /skills</li>
+        </ul>
+        <button class="contact-btn">CONNECT_</button>
+    </nav>
 
-<section>
+    <section class="hero">
+        <h1>Youssef Hadeg</h1>
+        <p>Building secure infrastructures & active defensive systems</p>
+        
+        <div class="terminal-container">
+            <div class="terminal">
+                <p><span class="prompt">root@youssef-host:~#</span> whoami</p>
+                <p>Cybersecurity Engineering Student</p>
+                <p><span class="prompt">root@youssef-host:~#</span> systemctl status career</p>
+                <p style="color: #00ff9d;">● Active: Seeking 6-month Security Engineer Internship (Summer 2026)</p>
+                <p><span class="prompt">root@youssef-host:~#</span> cat /opt/focus.txt</p>
+                <p>Network Security | SOC/SIEM | Linux Admin | Automation</p>
+                <p><span class="prompt">root@youssef-host:~#</span> <span class="blink">_</span></p>
+            </div>
+        </div>
+    </section>
 
-  <h2>About Me</h2>
-  <div class="card">
-    <p>
-      Cybersecurity student specializing in infrastructure defense, network security,
-      and security operations. Focused on building real-world defensive systems.
-    </p>
-  </div>
+    <h2 class="section-title">FEATURED_PROJECTS</h2>
+    <section class="cards">
+        <div class="card">
+            <h3>Active Defense: Custom IDS/IPS</h3>
+            <p>Engineered a Python-based Intrusion Detection and Prevention System. Parses live packet buffers with Scapy to detect stealth port scans and SYN floods, dynamically injecting strict drop constraints into Linux iptables.</p>
+            <div class="tech-stack">[ Python | Scapy | iptables | Netfilter ]</div>
+        </div>
+        
+        <div class="card">
+            <h3>Mini-SIEM: Correlation Engine</h3>
+            <p>Built a centralized correlation engine that tails logs across infrastructure. Implemented cross-log correlation rules matching Network IDS alerts with SSH auth logs to flag high-criticality lateral movement.</p>
+            <div class="tech-stack">[ Python | Regex | Rsyslog | SOC ]</div>
+        </div>
+        
+        <div class="card">
+            <h3>Enterprise Network Security</h3>
+            <p>Designed Site-to-Site IPsec VPN architectures integrating ISAKMP/IKE with Stateful Firewall ACLs. Hardened Layer 2 infrastructure deploying DHCP Snooping, DAI, and STP protections.</p>
+            <div class="tech-stack">[ Cisco IOS | IPsec VPN | Wireshark ]</div>
+        </div>
+    </section>
 
-  <h2>Skills</h2>
-  <div class="card">
-    <span class="tag">Cisco IOS</span>
-    <span class="tag">Linux</span>
-    <span class="tag">Python</span>
-    <span class="tag">Scapy</span>
-    <span class="tag">SIEM</span>
-    <span class="tag">Wireshark</span>
-    <span class="tag">Cryptography</span>
-  </div>
-
-  <h2>Projects</h2>
-
-  <div class="card">
-    <h3>Active Defense IDS/IPS</h3>
-    <p>Real-time intrusion detection system using Python + Scapy + iptables.</p>
-  </div>
-
-  <div class="card">
-    <h3>Mini SIEM</h3>
-    <p>Log correlation engine for detecting lateral movement and attacks.</p>
-  </div>
-
-  <div class="card">
-    <h3>Networking Labs</h3>
-    <p>IPsec VPN, VLANs, STP, DHCP Snooping, Packet Tracer simulations.</p>
-  </div>
-
-</section>
-
-<section>
-  <h2>Contact</h2>
-  <div class="card">
-    <p>Email: your-email@example.com</p>
-    <p>LinkedIn: your-linkedin</p>
-  </div>
-</section>
+    <h2 class="section-title">CORE_MODULES</h2>
+    <section class="cards">
+        <div class="card">
+            <h3>Linux Administration</h3>
+            <p>Managing virtualized environments with KVM and Virt-Manager on Parrot OS. Proficient in RHEL system daemon management (systemd) and kernel module triage.</p>
+            <div class="tech-stack">[ RHEL 10.1 | KVM | systemd | bash ]</div>
+        </div>
+        <div class="card">
+            <h3>Applied Cryptography</h3>
+            <p>Deep-dive implementations of AES SPN structures, DES Feistel networks, and asymmetric RSA/ECC primitives from scratch to understand algorithmic vulnerabilities.</p>
+            <div class="tech-stack">[ AES | RSA | ECC | Math ]</div>
+        </div>
+        <div class="card">
+            <h3>Machine Learning Foundations</h3>
+            <p>Developed core supervised models (Logistic/Softmax regression) and optimization algorithms, establishing the mathematical basis for anomaly detection.</p>
+            <div class="tech-stack">[ AI | Gradient Descent | Data Science ]</div>
+        </div>
+    </section>
 
 </body>
 </html>
