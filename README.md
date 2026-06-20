@@ -22,15 +22,14 @@ Currently finalizing my Bachelor's degree in Cyber Security, I am seeking a 6-mo
 * **The Problem:** Traditional networks lack automated, real-time responses to stealth reconnaissance and denial-of-service attempts.
 * **The Solution:** Developed a custom IDS/IPS engine from scratch using Python and `Scapy`. It continuously parses live packet buffers to detect temporal anomalies like SYN Floods and stealth port scans.
 * **The Result:** The engine successfully identifies threshold breaches and automatically injects strict drop constraints into the Linux `iptables` netfilter, blocking attackers instantly without human intervention.
-* **Architecture & Alerts:**
-  ![IDS/IPS Architecture](./assets/ids-alerts.png)
+
+
 
 ### 2. Mini-SIEM: Event Correlation Engine
 * **The Problem:** Disconnected logs across routers, firewalls, and Linux servers make it difficult to track lateral movement and complex attack chains.
 * **The Solution:** Built a centralized correlation engine that tails logs across the infrastructure. Implemented cross-log correlation rules, such as matching a Network IDS alert with a subsequent successful SSH login.
 * **The Result:** A functional SOC mechanism capable of flagging high-criticality threats and significantly reducing attacker dwell time.
-* **Live Dashboard:**
-  ![SIEM Dashboard](./assets/siem-dashboard.png)
+
 
 ---
 
