@@ -18,14 +18,14 @@ The topology simulates two isolated corporate LANs connected via a public ISP.
 * **Site 2 LAN:** `30.0.0.0/8`
 * **WAN Links:** `101.0.0.0/24` and `102.0.0.0/24`
 
-![Architecture](1-topology-ipsec-site-to-site.png)
+![Architecture](images/1-topology-ipsec-site-to-site.png)
 
 ---
 
 ## 🔐 Phase 2: Cryptographic Implementation
 Implementation of an IPsec tunnel using a robust Transform Set. The Security Associations (SA) were verified natively within the Cisco IOS environment, confirming the successful negotiation of Phase 1 (ISAKMP) and Phase 2 (IPsec).
 
-![ISAKMP Status](2-crypto-sa-verification.png)
+![ISAKMP Status](images/2-crypto-sa-verification.png)
 *> Status QM_IDLE and ACTIVE confirms the mathematical exchange is stable.*
 
 ---
@@ -33,12 +33,12 @@ Implementation of an IPsec tunnel using a robust Transform Set. The Security Ass
 ## 📡 Phase 3: End-to-End Connectivity
 Validation of the routing tables and Access Control Lists (ACLs). The ICMP traffic successfully travels from Site 1 (PC1) to Site 2 (PC2) triggering the encryption engine.
 
-![Connectivity Test](3-end-to-end-connectivity.png)
+![Connectivity Test](images/3-end-to-end-connectivity.png)
 
 ---
 
 ## 🕵️‍♂️ Phase 4: Man-in-the-Middle Verification (The Proof)
 To prove the infrastructure's resilience against eavesdropping, a packet capture was initiated on the public ISP link. As expected, internal IP addresses and ICMP protocols are completely obfuscated, encapsulated within the **ESP (Encapsulating Security Payload)** protocol. 
 
-![Wireshark ESP Proof](4-wireshark-esp-encryption-proof.png)
+![Wireshark ESP Proof](images/4-wireshark-esp-encryption-proof.png)
 *> The payload is rendered mathematically unreadable to unauthorized external actors.*
