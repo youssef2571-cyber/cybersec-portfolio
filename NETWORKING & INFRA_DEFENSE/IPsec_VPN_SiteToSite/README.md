@@ -1,5 +1,5 @@
 # 🛡️ IPsec Site-to-Site VPN Architecture
-**A Proof of Concept (PoC) by NY² Networking & Infrastructure**
+**A Technical Proof of Concept (PoC) for Infrastructure Defense**
 
 ## 📌 Project Objective
 Design and implementation of a highly secure, encrypted Site-to-Site communication channel over an untrusted public network (WAN). This project demonstrates advanced routing, cryptographic tunneling (IPsec), and deep packet inspection evasion.
