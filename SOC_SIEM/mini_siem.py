@@ -35,18 +35,18 @@ SEVERITY_BAR_STYLE = {
 }
 SEVERITY_ORDER = ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
 
-# Mapping of attack types to Kill Chain stages (simplified Cyber Kill Chain)
+# Mapping des types d'attaque vers les étapes de la Kill Chain (Cyber Kill Chain simplifiée)
 KILL_CHAIN_STAGES = [
     ("RECONNAISSANCE", ["PORT_SCAN", "WEB_ENUMERATION"]),
     ("INTRUSION",       ["SQL_INJECTION", "XSS_ATTACK", "SSH_BRUTE", "SENSITIVE_FILE_ACCESS"]),
     ("C2 / BEACONING",  ["C2_BEACON"]),
-    ("LATERAL MOVEMENT", ["LATERAL_MOVEMENT"]),
+    ("MOUVEMENT LATÉRAL", ["LATERAL_MOVEMENT"]),
     ("EXFILTRATION",    ["DATA_EXFILTRATION"]),
 ]
 
 
 class Aggregator:
-    """Keeps state in memory so the whole file is never re-read."""
+    """Conserve l'état en mémoire pour ne jamais relire tout le fichier."""
 
     def __init__(self):
         self.total = 0
@@ -87,8 +87,8 @@ class Aggregator:
         severity = sev_match.group(1) if sev_match else "LOW"
         src_ip = src_match.group(1) if src_match else "?"
 
-        # "Already banned" noise is counted separately: it pollutes the stats without representing
-        # a new threat (this is exactly the visual anti-spam problem the original SIEM aimed to solve).
+        # Le bruit "déjà banni" est compté à part : il pollue les stats sans représenter
+        # une nouvelle menace (c'est exactement le problème d'anti-spam visuel du SIEM d'origine).
         if attack_type == "REPEATED_ATTACK":
             self.dropped_by_ips += 1
             return
@@ -109,13 +109,13 @@ def render_header(agg):
     status.append("AGGREGATION DASHBOARD", style="bold cyan")
     status.append("  •  ", style="dim")
     if agg.total == 0:
-        status.append("NETWORK SECURE", style="bold green")
+        status.append("RÉSEAU SÉCURISÉ", style="bold green")
     else:
-        status.append(f"{agg.total} EVENTS", style="bold red")
+        status.append(f"{agg.total} ÉVÈNEMENTS", style="bold red")
         status.append("  •  ", style="dim")
-        status.append(f"🔥 {sum(agg.type_counts.values())} distinct threats", style="bold orange3")
+        status.append(f"🔥 {sum(agg.type_counts.values())} menaces distinctes", style="bold orange3")
         status.append("  •  ", style="dim")
-        status.append(f"🧱 {agg.dropped_by_ips} packets dropped by the IPS (banned IPs)", style="dim")
+        status.append(f"🧱 {agg.dropped_by_ips} paquets droppés par l'IPS (IP bannies)", style="dim")
     return Panel(Align.center(status), box=box.HEAVY, style="on grey11")
 
 
@@ -136,41 +136,41 @@ def render_severity_panel(agg):
             Text(bar, style=SEVERITY_BAR_STYLE[sev]),
             Text(str(count), style=style),
         )
-    return Panel(table, title="🛡️  Severity", border_style="magenta", box=box.ROUNDED)
+    return Panel(table, title="🛡️  Sévérité", border_style="magenta", box=box.ROUNDED)
 
 
 def render_top_threats(agg):
     table = Table(box=box.SIMPLE_HEAVY, expand=True, show_edge=False)
-    table.add_column("Attack Type", style="bold")
-    table.add_column("Hits", justify="right")
+    table.add_column("Type d'attaque", style="bold")
+    table.add_column("Occ.", justify="right")
     table.add_column("", ratio=1)
 
     if not agg.type_counts:
-        return Panel(Text("Waiting for data...", style="dim"), title="🔥 Top Threats", border_style="red")
+        return Panel(Text("En attente de données...", style="dim"), title="🔥 Top Menaces", border_style="red")
 
     max_count = max(agg.type_counts.values())
     for attack, count in agg.type_counts.most_common(6):
         bar_len = int((count / max_count) * 18)
         bar = Text("▇" * bar_len, style="red")
         table.add_row(attack, str(count), bar)
-    return Panel(table, title="🔥 Top Threats (by volume)", border_style="red", box=box.ROUNDED)
+    return Panel(table, title="🔥 Top Menaces (par volume)", border_style="red", box=box.ROUNDED)
 
 
 def render_top_attackers(agg):
     table = Table(box=box.SIMPLE_HEAVY, expand=True, show_edge=False)
-    table.add_column("Source IP", style="bold cyan")
-    table.add_column("Packets", justify="right")
+    table.add_column("IP Source", style="bold cyan")
+    table.add_column("Paquets", justify="right")
     table.add_column("", ratio=1)
 
     if not agg.ip_counts:
-        return Panel(Text("Waiting for data...", style="dim"), title="🎯 Top Attackers", border_style="cyan")
+        return Panel(Text("En attente de données...", style="dim"), title="🎯 Top Attaquants", border_style="cyan")
 
     max_count = max(agg.ip_counts.values())
     for ip, count in agg.ip_counts.most_common(6):
         bar_len = int((count / max_count) * 18)
         bar = Text("▇" * bar_len, style="bright_cyan")
         table.add_row(ip, str(count), bar)
-    return Panel(table, title="🎯 Top Attackers (Source IPs)", border_style="cyan", box=box.ROUNDED)
+    return Panel(table, title="🎯 Top Attaquants (IP Sources)", border_style="cyan", box=box.ROUNDED)
 
 
 def render_kill_chain(agg):
@@ -183,7 +183,7 @@ def render_kill_chain(agg):
         text.append(stage_name, style=style if seen else "dim")
         if i < len(KILL_CHAIN_STAGES) - 1:
             text.append("   ➔   ", style="dim")
-    return Panel(Align.center(text), title="⛓️  Kill Chain Progress", border_style="yellow", box=box.ROUNDED)
+    return Panel(Align.center(text), title="⛓️  Progression de la Kill Chain", border_style="yellow", box=box.ROUNDED)
 
 
 def render_timeline(agg):
@@ -195,18 +195,18 @@ def render_timeline(agg):
         idx = int((v / max_val) * (len(sparks) - 1)) if max_val else 0
         color = "green" if v == 0 else ("red" if idx >= 6 else "yellow")
         line.append(sparks[idx], style=color)
-    subtitle = f"({TIMELINE_BUCKET_SEC}s buckets • peak = {max_val} events)"
+    subtitle = f"(tranches de {TIMELINE_BUCKET_SEC}s • pic = {max_val} évènements)"
     grid = Table.grid()
     grid.add_row(line)
     grid.add_row(Text(subtitle, style="dim"))
-    return Panel(grid, title="📈 Malicious Traffic Timeline", border_style="green", box=box.ROUNDED)
+    return Panel(grid, title="📈 Timeline du Trafic Malveillant", border_style="green", box=box.ROUNDED)
 
 
 def render_alert_feed(agg):
     table = Table(box=box.SIMPLE, expand=True, show_edge=False)
-    table.add_column("Time", style="dim", width=9)
+    table.add_column("Heure", style="dim", width=9)
     table.add_column("Type", style="bold")
-    table.add_column("Sev.", width=9)
+    table.add_column("Sév.", width=9)
     table.add_column("Source")
 
     for ts, attack_type, sev, ip in reversed(agg.recent_alerts):
@@ -214,8 +214,8 @@ def render_alert_feed(agg):
         table.add_row(ts, attack_type, Text(sev, style=style), ip)
 
     if not agg.recent_alerts:
-        return Panel(Text("No recent alerts.", style="dim"), title="📜 Live Alert Feed", border_style="white")
-    return Panel(table, title="📜 Live Alert Feed", border_style="white", box=box.ROUNDED)
+        return Panel(Text("Aucune alerte récente.", style="dim"), title="📜 Flux d'Alertes en Direct", border_style="white")
+    return Panel(table, title="📜 Flux d'Alertes en Direct", border_style="white", box=box.ROUNDED)
 
 
 def build_layout(agg):
@@ -250,7 +250,7 @@ def build_layout(agg):
 
 
 def main():
-    console.print("[bold cyan]Initializing aggregation engine...[/bold cyan]")
+    console.print("[bold cyan]Initialisation du moteur d'agrégation...[/bold cyan]")
     open(ALERT_FILE, "a").close()
 
     agg = Aggregator()
@@ -270,4 +270,4 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        console.print("\n[yellow]Stopping dashboard.[/yellow]")
+        console.print("\n[yellow]Arrêt du dashboard.[/yellow]")
