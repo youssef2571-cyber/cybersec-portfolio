@@ -1,99 +1,273 @@
-"""
-Advanced Mini-SIEM Engine
-Features Cross-Log Correlation: Connects Network Alerts (IDS) with System Logs (SSH).
-"""
-
 import time
+import os
 import re
-from collections import defaultdict
+import collections
 
-LOG_FILE = "central_syslog.log"
-TIME_WINDOW = 60
+from rich.console import Console
+from rich.layout import Layout
+from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
+from rich.live import Live
+from rich.align import Align
+from rich.bar import Bar
+from rich import box
 
-# Tracking states
-failed_auth_tracker = defaultdict(list)
-recent_ids_alerts = {} # Tracks IPs that triggered IDS: { 'IP': timestamp }
+ALERT_FILE = "ids_alerts.log"
+REFRESH_SEC = 1
+TIMELINE_BUCKET_SEC = 5
+TIMELINE_BUCKETS = 40
+ALERT_FEED_SIZE = 9
 
-def trigger_alert(severity, alert_name, ip, details):
-    """Outputs the correlated alert to the SOC dashboard."""
-    print(f"\n[{severity}] {alert_name}")
-    print(f" ➔ Threat IP : {ip}")
-    print(f" ➔ Details   : {details}\n")
+console = Console()
 
-def parse_and_correlate(log_line):
-    current_time = time.time()
-    
-    # ---------------------------------------------------------
-    # PARSER 1: Custom IDS/IPS Alerts
-    # ---------------------------------------------------------
-    ids_pattern = r"\[IDS ALERT\].*from (\d+\.\d+\.\d+\.\d+)"
-    ids_match = re.search(ids_pattern, log_line)
-    if ids_match:
-        attacker_ip = ids_match.group(1)
-        recent_ids_alerts[attacker_ip] = current_time
-        print(f"[INGEST] Network IDS alert registered for {attacker_ip}")
-        return
+SEVERITY_STYLE = {
+    "CRITICAL": "bold white on red",
+    "HIGH":     "bold red",
+    "MEDIUM":   "bold yellow",
+    "LOW":      "dim white",
+}
+SEVERITY_BAR_STYLE = {
+    "CRITICAL": "red",
+    "HIGH":     "red",
+    "MEDIUM":   "yellow",
+    "LOW":      "white",
+}
+SEVERITY_ORDER = ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
 
-    # ---------------------------------------------------------
-    # PARSER 2: SSH Failed Logins (Brute Force Detection)
-    # ---------------------------------------------------------
-    ssh_fail_pattern = r"Failed password for .* from (\d+\.\d+\.\d+\.\d+)"
-    fail_match = re.search(ssh_fail_pattern, log_line)
-    if fail_match:
-        attacker_ip = fail_match.group(1)
-        failed_auth_tracker[attacker_ip].append(current_time)
-        print(f"[INGEST] SSH Failure logged from {attacker_ip}")
-        
-        # Clean old logs and check threshold
-        failed_auth_tracker[attacker_ip] = [t for t in failed_auth_tracker[attacker_ip] if current_time - t <= TIME_WINDOW]
-        if len(failed_auth_tracker[attacker_ip]) >= 5:
-            trigger_alert("HIGH", "SSH Brute Force Attack", attacker_ip, "5+ failed logins in 60s")
-            failed_auth_tracker[attacker_ip] = [] # Reset
-        return
+# Mapping of attack types to Kill Chain stages (simplified Cyber Kill Chain)
+KILL_CHAIN_STAGES = [
+    ("RECONNAISSANCE", ["PORT_SCAN", "WEB_ENUMERATION"]),
+    ("INTRUSION",       ["SQL_INJECTION", "XSS_ATTACK", "SSH_BRUTE", "SENSITIVE_FILE_ACCESS"]),
+    ("C2 / BEACONING",  ["C2_BEACON"]),
+    ("LATERAL MOVEMENT", ["LATERAL_MOVEMENT"]),
+    ("EXFILTRATION",    ["DATA_EXFILTRATION"]),
+]
 
-    # ---------------------------------------------------------
-    # PARSER 3: SSH Successful Logins (Cross-Correlation Rule)
-    # ---------------------------------------------------------
-    ssh_success_pattern = r"Accepted password for .* from (\d+\.\d+\.\d+\.\d+)"
-    success_match = re.search(ssh_success_pattern, log_line)
-    if success_match:
-        attacker_ip = success_match.group(1)
-        print(f"[INGEST] Valid SSH Login from {attacker_ip}")
-        
-        # CROSS-CORRELATION: Did this IP trigger an IDS alert recently?
-        if attacker_ip in recent_ids_alerts:
-            time_diff = current_time - recent_ids_alerts[attacker_ip]
-            if time_diff <= 300: 
-                trigger_alert(
-                    " CRITICAL", 
-                    "COMPROMISED HOST (Lateral Movement)", 
-                    attacker_ip, 
-                    f"Successful SSH login occurred {int(time_diff)}s after a Network IDS Alert!"
-                )
-                del recent_ids_alerts[attacker_ip] 
-        return
 
-def follow_log(filename):
-    """Tails the log file in real-time."""
-    try:
-        with open(filename, "r") as file:
-            file.seek(0, 2)
-            while True:
-                line = file.readline()
-                if not line:
-                    time.sleep(0.1)
-                    continue
-                yield line
-    except FileNotFoundError:
-        print(f"[ERROR] Cannot find {filename}. Please run the simulation script.")
+class Aggregator:
+    """Keeps state in memory so the whole file is never re-read."""
+
+    def __init__(self):
+        self.total = 0
+        self.dropped_by_ips = 0   # paquets bloqués car IP déjà bannie (bruit pur, isolé du reste)
+        self.type_counts = collections.Counter()
+        self.ip_counts = collections.Counter()
+        self.severity_counts = collections.Counter()
+        self.stages_seen = set()
+        self.timeline = collections.deque([0] * TIMELINE_BUCKETS, maxlen=TIMELINE_BUCKETS)
+        self.recent_alerts = collections.deque(maxlen=ALERT_FEED_SIZE)
+        self._bucket_start = None
+        self._bucket_count = 0
+
+    def maybe_roll_timeline(self):
+        now = time.time()
+        if self._bucket_start is None:
+            self._bucket_start = now
+            return
+        if now - self._bucket_start >= TIMELINE_BUCKET_SEC:
+            self.timeline.append(self._bucket_count)
+            self._bucket_count = 0
+            self._bucket_start = now
+
+    def _update_stages(self, attack_type):
+        for stage_name, types in KILL_CHAIN_STAGES:
+            if attack_type in types:
+                self.stages_seen.add(stage_name)
+
+    def ingest(self, line):
+        type_match = re.search(r"TYPE:(\w+)", line)
+        sev_match = re.search(r"SEV:(\w+)", line)
+        src_match = re.search(r"SRC:([0-9.]+)", line)
+
+        self.total += 1
+        self._bucket_count += 1
+
+        attack_type = type_match.group(1) if type_match else "UNKNOWN"
+        severity = sev_match.group(1) if sev_match else "LOW"
+        src_ip = src_match.group(1) if src_match else "?"
+
+        # "Already banned" noise is counted separately: it pollutes the stats without representing
+        # a new threat (this is exactly the visual anti-spam problem the original SIEM aimed to solve).
+        if attack_type == "REPEATED_ATTACK":
+            self.dropped_by_ips += 1
+            return
+
+        self.type_counts[attack_type] += 1
+        self.severity_counts[severity] += 1
+        if src_match:
+            self.ip_counts[src_ip] += 1
+
+        self._update_stages(attack_type)
+        self.recent_alerts.append((time.strftime("%H:%M:%S"), attack_type, severity, src_ip))
+
+
+def render_header(agg):
+    status = Text(justify="center")
+    status.append(" ENTERPRISE SOC ", style="bold white on dark_blue")
+    status.append("  •  ", style="dim")
+    status.append("AGGREGATION DASHBOARD", style="bold cyan")
+    status.append("  •  ", style="dim")
+    if agg.total == 0:
+        status.append("NETWORK SECURE", style="bold green")
+    else:
+        status.append(f"{agg.total} EVENTS", style="bold red")
+        status.append("  •  ", style="dim")
+        status.append(f"🔥 {sum(agg.type_counts.values())} distinct threats", style="bold orange3")
+        status.append("  •  ", style="dim")
+        status.append(f"🧱 {agg.dropped_by_ips} packets dropped by the IPS (banned IPs)", style="dim")
+    return Panel(Align.center(status), box=box.HEAVY, style="on grey11")
+
+
+def render_severity_panel(agg):
+    table = Table.grid(padding=(0, 1))
+    table.add_column(justify="left")
+    table.add_column(justify="left", ratio=1)
+    table.add_column(justify="right")
+
+    max_count = max(agg.severity_counts.values(), default=1)
+    for sev in SEVERITY_ORDER:
+        count = agg.severity_counts.get(sev, 0)
+        style = SEVERITY_STYLE[sev]
+        bar_width = int((count / max_count) * 20) if max_count else 0
+        bar = "█" * bar_width + "░" * (20 - bar_width)
+        table.add_row(
+            Text(sev, style=style),
+            Text(bar, style=SEVERITY_BAR_STYLE[sev]),
+            Text(str(count), style=style),
+        )
+    return Panel(table, title="🛡️  Severity", border_style="magenta", box=box.ROUNDED)
+
+
+def render_top_threats(agg):
+    table = Table(box=box.SIMPLE_HEAVY, expand=True, show_edge=False)
+    table.add_column("Attack Type", style="bold")
+    table.add_column("Hits", justify="right")
+    table.add_column("", ratio=1)
+
+    if not agg.type_counts:
+        return Panel(Text("Waiting for data...", style="dim"), title="🔥 Top Threats", border_style="red")
+
+    max_count = max(agg.type_counts.values())
+    for attack, count in agg.type_counts.most_common(6):
+        bar_len = int((count / max_count) * 18)
+        bar = Text("▇" * bar_len, style="red")
+        table.add_row(attack, str(count), bar)
+    return Panel(table, title="🔥 Top Threats (by volume)", border_style="red", box=box.ROUNDED)
+
+
+def render_top_attackers(agg):
+    table = Table(box=box.SIMPLE_HEAVY, expand=True, show_edge=False)
+    table.add_column("Source IP", style="bold cyan")
+    table.add_column("Packets", justify="right")
+    table.add_column("", ratio=1)
+
+    if not agg.ip_counts:
+        return Panel(Text("Waiting for data...", style="dim"), title="🎯 Top Attackers", border_style="cyan")
+
+    max_count = max(agg.ip_counts.values())
+    for ip, count in agg.ip_counts.most_common(6):
+        bar_len = int((count / max_count) * 18)
+        bar = Text("▇" * bar_len, style="bright_cyan")
+        table.add_row(ip, str(count), bar)
+    return Panel(table, title="🎯 Top Attackers (Source IPs)", border_style="cyan", box=box.ROUNDED)
+
+
+def render_kill_chain(agg):
+    text = Text(justify="left")
+    for i, (stage_name, _) in enumerate(KILL_CHAIN_STAGES):
+        seen = stage_name in agg.stages_seen
+        marker = "●" if seen else "○"
+        style = "bold green" if seen else "dim white"
+        text.append(f"{marker} ", style=style)
+        text.append(stage_name, style=style if seen else "dim")
+        if i < len(KILL_CHAIN_STAGES) - 1:
+            text.append("   ➔   ", style="dim")
+    return Panel(Align.center(text), title="⛓️  Kill Chain Progress", border_style="yellow", box=box.ROUNDED)
+
+
+def render_timeline(agg):
+    values = list(agg.timeline)
+    max_val = max(values) if any(values) else 1
+    sparks = " ▁▂▃▄▅▆▇█"
+    line = Text()
+    for v in values:
+        idx = int((v / max_val) * (len(sparks) - 1)) if max_val else 0
+        color = "green" if v == 0 else ("red" if idx >= 6 else "yellow")
+        line.append(sparks[idx], style=color)
+    subtitle = f"({TIMELINE_BUCKET_SEC}s buckets • peak = {max_val} events)"
+    grid = Table.grid()
+    grid.add_row(line)
+    grid.add_row(Text(subtitle, style="dim"))
+    return Panel(grid, title="📈 Malicious Traffic Timeline", border_style="green", box=box.ROUNDED)
+
+
+def render_alert_feed(agg):
+    table = Table(box=box.SIMPLE, expand=True, show_edge=False)
+    table.add_column("Time", style="dim", width=9)
+    table.add_column("Type", style="bold")
+    table.add_column("Sev.", width=9)
+    table.add_column("Source")
+
+    for ts, attack_type, sev, ip in reversed(agg.recent_alerts):
+        style = SEVERITY_STYLE.get(sev, "white")
+        table.add_row(ts, attack_type, Text(sev, style=style), ip)
+
+    if not agg.recent_alerts:
+        return Panel(Text("No recent alerts.", style="dim"), title="📜 Live Alert Feed", border_style="white")
+    return Panel(table, title="📜 Live Alert Feed", border_style="white", box=box.ROUNDED)
+
+
+def build_layout(agg):
+    layout = Layout()
+    layout.split_column(
+        Layout(name="header", size=3),
+        Layout(name="killchain", size=3),
+        Layout(name="body", ratio=2),
+        Layout(name="timeline", size=5),
+        Layout(name="feed", size=ALERT_FEED_SIZE + 3),
+    )
+    layout["body"].split_row(
+        Layout(name="left"),
+        Layout(name="right"),
+    )
+    layout["left"].split_column(
+        Layout(name="severity"),
+        Layout(name="threats"),
+    )
+    layout["right"].split_column(
+        Layout(name="attackers"),
+    )
+
+    layout["header"].update(render_header(agg))
+    layout["killchain"].update(render_kill_chain(agg))
+    layout["severity"].update(render_severity_panel(agg))
+    layout["threats"].update(render_top_threats(agg))
+    layout["attackers"].update(render_top_attackers(agg))
+    layout["timeline"].update(render_timeline(agg))
+    layout["feed"].update(render_alert_feed(agg))
+    return layout
+
+
+def main():
+    console.print("[bold cyan]Initializing aggregation engine...[/bold cyan]")
+    open(ALERT_FILE, "a").close()
+
+    agg = Aggregator()
+
+    with open(ALERT_FILE, "r") as f, Live(build_layout(agg), console=console, refresh_per_second=4, screen=True) as live:
+        while True:
+            line = f.readline()
+            if line:
+                agg.ingest(line)
+                continue
+            agg.maybe_roll_timeline()
+            live.update(build_layout(agg))
+            time.sleep(REFRESH_SEC)
+
 
 if __name__ == "__main__":
-    print("==================================================")
-    print("  Advanced SOC Correlation Engine")
-    print(" Active Rules:")
-    print("     1. SSH Brute Force Detection")
-    print("     2. IDS Alert + SSH Success (Critical Compromise)")
-    print("==================================================\n")
-    
-    for line in follow_log(LOG_FILE):
-        parse_and_correlate(line)
+    try:
+        main()
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Stopping dashboard.[/yellow]")
