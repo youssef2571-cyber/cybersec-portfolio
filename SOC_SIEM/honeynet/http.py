@@ -1,15 +1,3 @@
-"""
-HTTP Honeypot
-Simulates an Apache/PHP web server with a fake login page.
-
-Improvements over v1:
-  - Realistic HTTP routing (404 on unknown paths, 200 only on known endpoints)
-  - Extracts and logs the full User-Agent (reveals the scanner tool used)
-  - Detects SQLi / XSS payloads directly in the URL before forwarding to IDS
-  - POST body parsing to capture login credentials submitted to the fake form
-  - Always responds with convincing headers to avoid honeypot fingerprinting
-"""
-
 import os
 import re
 import socket
@@ -20,10 +8,10 @@ from urllib.parse import unquote
 LOG_FILE   = "raw_traffic.log"
 LISTEN_PORT = 8080
 
-# Paths that return 200 — everything else gets a realistic 404
+
 _KNOWN_PATHS = {"/", "/index.php", "/login", "/login.php", "/admin", "/admin/login.php"}
 
-# Inline quick-detection patterns (supplements the IDS engine)
+
 _SQLI_RE = re.compile(r"(?i)(union\s+select|or\s+1=1|--|select\s+\*\s+from|drop\s+table)")
 _XSS_RE  = re.compile(r"(?i)(<script|javascript:|alert\(|onerror=)")
 _LFI_RE  = re.compile(r"(\.\./|/etc/passwd|\.env|backup\.zip|\.git/|web\.config)")
@@ -117,10 +105,10 @@ def _parse_request(raw: str) -> tuple[str, str, str, str, str]:
             user_agent = line.split(":", 1)[1].strip()
             break
 
-    # POST body is after the blank line separator
+   
     body = raw.split("\r\n\r\n", 1)[1] if "\r\n\r\n" in raw else ""
 
-    # Extract base path (without query string) for routing
+    
     base_path = path.split("?")[0]
     return method, path, base_path, user_agent, body
 
@@ -135,14 +123,14 @@ def _handle_connection(client_sock: socket.socket, address: tuple) -> None:
         method, full_path, base_path, user_agent, body = _parse_request(raw)
         attack_type, severity = _classify_request(full_path, body)
 
-        # Log credential attempts from POST to the login page
+       
         creds_note = ""
         if method == "POST" and "login" in base_path and body:
             creds_note = f" POSTED_BODY='{body[:200]}'"
 
         _write_log(ip, method, full_path, user_agent, attack_type, severity, creds_note)
 
-        # Route response: 200 only on known paths, realistic 404 elsewhere
+      
         if base_path in _KNOWN_PATHS:
             if method == "POST" and "login" in base_path:
                 client_sock.sendall(_AUTH_FAILED.encode())
