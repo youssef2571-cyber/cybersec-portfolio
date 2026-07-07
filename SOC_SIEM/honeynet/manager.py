@@ -1,12 +1,3 @@
-"""
-Honeypot Manager
-Launches all honeypot sensors as threads (not subprocesses) in the same
-process, which gives us:
-  - Shared memory (no IPC needed between sensors)
-  - A single Ctrl+C to stop everything cleanly
-  - A live status line showing how many connections each sensor has handled
-"""
-
 import os
 import sys
 import time
@@ -25,7 +16,6 @@ SENSORS = [
 
 LOG_FILE = os.path.join(BASE_DIR, "raw_traffic.log")
 
-# Runtime state per sensor
 _sensor_status: dict[str, dict] = {}
 
 
@@ -53,7 +43,7 @@ def _print_status() -> None:
     now   = datetime.now().strftime("%H:%M:%S")
     total = _count_alerts()
 
-    print(f"\r\033[K", end="")   # clear current line
+    print(f"\r\033[K", end="")   
     parts = [f"\033[90m[{now}]\033[0m"]
     for s in SENSORS:
         n     = s["name"]
@@ -83,7 +73,7 @@ def _run_sensor(sensor: dict) -> None:
         _sensor_status[name]["alive"] = True
         module.start_honeypot(listen_port=port)
     except OSError as exc:
-        # Most common cause: port already in use
+      
         print(f"\n\033[1;91m[-] {name} failed to bind port {port}: {exc}\033[0m")
         print(f"\033[93m    Try: sudo lsof -i :{port}  to find what's using it.\033[0m")
     except Exception as exc:
@@ -94,7 +84,7 @@ def _run_sensor(sensor: dict) -> None:
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 def main() -> None:
-    # Create the shared log file if it doesn't exist yet
+    
     open(LOG_FILE, "a").close()
 
     print("\033[1;92m" + "=" * 55 + "\033[0m")
@@ -106,7 +96,7 @@ def main() -> None:
         t = threading.Thread(target=_run_sensor, args=(sensor,), daemon=True, name=sensor["name"])
         t.start()
         threads.append(t)
-        time.sleep(0.4)   # stagger startup so banners don't interleave
+        time.sleep(0.4)   
 
     print(f"\n\033[1;96m[*] All sensors launched.\033[0m")
     print(f"\033[1;96m[*] Log file : {LOG_FILE}\033[0m")
@@ -119,7 +109,7 @@ def main() -> None:
             time.sleep(1)
     except KeyboardInterrupt:
         print(f"\n\n\033[1;93m[*] Shutdown signal received. Stopping all sensors...\033[0m")
-        # Daemon threads die automatically when the main thread exits
+    
         print("\033[1;92m[+] Honeynet offline. All ports released.\033[0m")
         sys.exit(0)
 
