@@ -38,7 +38,7 @@ SEVERITY_ORDER = ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
 # Mapping des types d'attaque vers les étapes de la Kill Chain (Cyber Kill Chain simplifiée)
 KILL_CHAIN_STAGES = [
     ("RECONNAISSANCE", ["PORT_SCAN", "WEB_ENUMERATION"]),
-    ("INTRUSION",       ["SQL_INJECTION", "XSS_ATTACK", "SSH_BRUTE", "SENSITIVE_FILE_ACCESS"]),
+    ("INTRUSION",       ["SQL_INJECTION", "XSS_ATTACK", "SSH_BRUTE","FTP_BRUTE", "SENSITIVE_FILE_ACCESS"]),
     ("C2 / BEACONING",  ["C2_BEACON"]),
     ("MOUVEMENT LATÉRAL", ["LATERAL_MOVEMENT"]),
     ("EXFILTRATION",    ["DATA_EXFILTRATION"]),
@@ -54,6 +54,7 @@ class Aggregator:
         self.type_counts = collections.Counter()
         self.ip_counts = collections.Counter()
         self.severity_counts = collections.Counter()
+        self.cred_counts = collections.Counter()
         self.stages_seen = set()
         self.timeline = collections.deque([0] * TIMELINE_BUCKETS, maxlen=TIMELINE_BUCKETS)
         self.recent_alerts = collections.deque(maxlen=ALERT_FEED_SIZE)
@@ -79,6 +80,7 @@ class Aggregator:
         type_match = re.search(r"TYPE:(\w+)", line)
         sev_match = re.search(r"SEV:(\w+)", line)
         src_match = re.search(r"SRC:([0-9.]+)", line)
+        cred_match = re.search(r"CREDENTIALS='([^']+)'", line)
 
         self.total += 1
         self._bucket_count += 1
@@ -97,6 +99,8 @@ class Aggregator:
         self.severity_counts[severity] += 1
         if src_match:
             self.ip_counts[src_ip] += 1
+        if cred_match:
+            self.cred_counts[cred_match.group(1)] += 1    
 
         self._update_stages(attack_type)
         self.recent_alerts.append((time.strftime("%H:%M:%S"), attack_type, severity, src_ip))
@@ -171,7 +175,23 @@ def render_top_attackers(agg):
         bar = Text("▇" * bar_len, style="bright_cyan")
         table.add_row(ip, str(count), bar)
     return Panel(table, title="🎯 Top Attaquants (IP Sources)", border_style="cyan", box=box.ROUNDED)
+def render_top_credentials(agg):
+    table = Table(box=box.SIMPLE_HEAVY, expand=True, show_edge=False)
+    table.add_column("Identifiants (User:Pass)", style="bold magenta")
+    table.add_column("Occ.", justify="right")
+    table.add_column("", ratio=1) 
 
+    if not agg.cred_counts:
+        return Panel(Text("En attente de captures...", style="dim"), title="🔑 Top Identifiants (Honeypot)", border_style="magenta")
+
+    max_count = max(agg.cred_counts.values())
+    # On affiche le top 6 des combinaisons user:pass
+    for cred, count in agg.cred_counts.most_common(6):
+        bar_len = int((count / max_count) * 15)
+        bar = Text("▇" * bar_len, style="bright_magenta")
+        table.add_row(cred, str(count), bar)
+        
+    return Panel(table, title="🔑 Top Identifiants (Honeypot)", border_style="magenta", box=box.ROUNDED)
 
 def render_kill_chain(agg):
     text = Text(justify="left")
@@ -237,6 +257,7 @@ def build_layout(agg):
     )
     layout["right"].split_column(
         Layout(name="attackers"),
+        Layout(name="credentials") 
     )
 
     layout["header"].update(render_header(agg))
@@ -244,6 +265,7 @@ def build_layout(agg):
     layout["severity"].update(render_severity_panel(agg))
     layout["threats"].update(render_top_threats(agg))
     layout["attackers"].update(render_top_attackers(agg))
+    layout["credentials"].update(render_top_credentials(agg))
     layout["timeline"].update(render_timeline(agg))
     layout["feed"].update(render_alert_feed(agg))
     return layout
