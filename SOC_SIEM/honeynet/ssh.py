@@ -1,15 +1,3 @@
-"""
-SSH Honeypot — powered by paramiko
-Simulates a real OpenSSH server well enough to capture actual credentials
-from brute-force tools (Hydra, Medusa, Ncrack, automated bots).
-
-How it works:
-  1. Completes a real SSH handshake (key exchange + algorithm negotiation)
-  2. Reaches the authentication stage and asks for credentials
-  3. Always rejects the login — but logs every username/password attempt
-  4. Writes to raw_traffic.log in the exact format expected by ids_ips_engine.py
-"""
-
 import os
 import socket
 import threading
@@ -23,12 +11,10 @@ LOG_FILE        = "raw_traffic.log"
 LISTEN_PORT     = 2222
 HOST_KEY_PATH   = os.path.join(os.path.dirname(__file__), "honeypot_rsa.key")
 
-# Local per-IP counter for fast rate detection at the honeypot level
-# (supplements the IDS sliding-window detection with an instant first-pass)
 _ip_hit_count: dict[str, int] = {}
-INSTANT_BAN_THRESHOLD = 10   # flag as SSH_BRUTE after N attempts from same IP
+INSTANT_BAN_THRESHOLD = 10  
 
-# Silence paramiko's own transport logs — we handle our own structured logging
+
 logging.getLogger("paramiko").setLevel(logging.CRITICAL)
 
 
@@ -59,7 +45,6 @@ def _write_log(ip: str, port: int, username: str, password: str) -> None:
     hits = _ip_hit_count.get(ip, 0) + 1
     _ip_hit_count[ip] = hits
 
-    # After the threshold, tag the line directly so the IDS picks it up instantly
     extra_tag = " TYPE=SSH_BRUTE" if hits >= INSTANT_BAN_THRESHOLD else ""
 
     entry = (
@@ -87,18 +72,18 @@ class _HoneypotServer(paramiko.ServerInterface):
         self.ip   = ip
         self.port = port
 
-    # Allow the client to open a session channel (required by most SSH clients)
+  
     def check_channel_request(self, kind: str, chanid: int) -> int:
         if kind == "session":
             return paramiko.OPEN_SUCCEEDED
         return paramiko.OPEN_FAILED_ADMINISTRATIVELY_PROHIBITED
 
-    # This is called for every password attempt — the honeypot's core capture point
+   
     def check_auth_password(self, username: str, password: str) -> int:
         _write_log(self.ip, self.port, username, password)
-        return paramiko.AUTH_FAILED          # always reject
+        return paramiko.AUTH_FAILED        
 
-    # Also capture public-key attempts (reveals the key type the attacker uses)
+  
     def check_auth_publickey(self, username: str, key: paramiko.PKey) -> int:
         ts  = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         entry = (
@@ -114,7 +99,7 @@ class _HoneypotServer(paramiko.ServerInterface):
         return paramiko.AUTH_FAILED
 
     def get_allowed_auths(self, username: str) -> str:
-        return "password,publickey"          # advertise both, accept neither
+        return "password,publickey"          
 
 
 # ── Per-connection handler ────────────────────────────────────────────────────
@@ -122,7 +107,7 @@ def _handle_connection(client_sock: socket.socket, address: tuple) -> None:
     ip, port = address
     transport = None
     try:
-        # Build a paramiko Transport — this manages the full SSH protocol layer
+        
         transport = paramiko.Transport(client_sock)
         transport.local_version = "SSH-2.0-OpenSSH_8.9p1 Ubuntu-3ubuntu0.6"
         transport.add_server_key(HOST_KEY)
@@ -130,14 +115,12 @@ def _handle_connection(client_sock: socket.socket, address: tuple) -> None:
         server = _HoneypotServer(ip, port)
         transport.start_server(server=server)
 
-        # Hold the channel open briefly — gives slow/retrying clients time to
-        # send multiple credential attempts before we close the connection
         channel = transport.accept(timeout=20)
         if channel:
             channel.close()
 
     except (paramiko.SSHException, EOFError, ConnectionResetError):
-        pass   # normal for scanners that abort after the first auth failure
+        pass   
     except Exception as exc:
         print(f"  [SSH] Unexpected error from {ip}: {exc}")
     finally:
