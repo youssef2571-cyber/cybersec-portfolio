@@ -1,14 +1,3 @@
-"""
-FTP Honeypot
-Simulates a vsFTPd server that fully interacts with brute-force clients.
-
-Improvements over v1:
-  - Per-IP attempt counter with instant tagging when threshold is crossed
-  - Handles QUIT, SYST, FEAT commands so real FTP clients don't abort early
-  - Logs both username and password on every attempt
-  - Slight random delay before rejecting auth (slows down automated tools)
-"""
-
 import os
 import random
 import socket
@@ -19,7 +8,7 @@ from datetime import datetime
 LOG_FILE    = "raw_traffic.log"
 LISTEN_PORT = 2121
 
-# Per-IP attempt tracking (same logic as SSH honeypot)
+
 _ip_hit_count: dict[str, int] = {}
 FTP_BRUTE_THRESHOLD = 5
 
@@ -47,7 +36,7 @@ def _write_log(ip: str, port: int, username: str, password: str) -> None:
 def _handle_connection(client_sock: socket.socket, address: tuple) -> None:
     ip, port = address
     try:
-        # Realistic vsFTPd banner — version matches a common real-world deployment
+       
         client_sock.sendall(b"220 (vsFTPd 3.0.5)\r\n")
 
         current_user = "anonymous"
@@ -70,13 +59,13 @@ def _handle_connection(client_sock: socket.socket, address: tuple) -> None:
             elif cmd.startswith("PASS "):
                 password = raw[5:].strip()
 
-                # Small random delay: slows Hydra/Medusa, gives IDS time to react
+              
                 time.sleep(random.uniform(0.3, 0.8))
 
                 _write_log(ip, port, current_user, password)
                 client_sock.sendall(b"530 Login incorrect.\r\n")
 
-                # Reset so the client can try another username without reconnecting
+              
                 current_user = "anonymous"
 
             elif cmd == "QUIT":
@@ -84,11 +73,11 @@ def _handle_connection(client_sock: socket.socket, address: tuple) -> None:
                 break
 
             elif cmd == "SYST":
-                # Advertise Linux — makes us look more realistic
+             
                 client_sock.sendall(b"215 UNIX Type: L8\r\n")
 
             elif cmd == "FEAT":
-                # Advertise a minimal feature set matching vsFTPd
+               
                 client_sock.sendall(
                     b"211-Features:\r\n PASV\r\n UTF8\r\n211 End\r\n"
                 )
