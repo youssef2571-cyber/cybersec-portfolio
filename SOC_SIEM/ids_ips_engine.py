@@ -16,7 +16,8 @@ PORT_SCAN_THRESHOLD = 8         # Nb de paquets suspects dans la fenêtre
 
 # Signatures "instantanées" (une seule ligne suffit)
 INSTANT_SIGNATURES = {
-    "SQL_INJECTION":         (r"(?i)(UNION SELECT|OR 1=1|--|SELECT \* FROM)", "HIGH"),
+    # OR 1=1 catches numeric boolean, OR '1'='1 catches quoted string boolean (Sqlmap default)
+    "SQL_INJECTION":         (r"(?i)(UNION SELECT|OR\s+'?1'?='?1|--|SELECT \* FROM|SLEEP\s*\(|xp_cmdshell|EXTRACTVALUE)", "HIGH"),
     "XSS_ATTACK":            (r"(?i)(<script>|javascript:|alert\()", "MEDIUM"),
     "SENSITIVE_FILE_ACCESS": (r"TYPE=SENSITIVE_FILE_ACCESS", "CRITICAL"),
     "DATA_EXFILTRATION":     (r"TYPE=DATA_EXFILTRATION", "CRITICAL"),
@@ -27,6 +28,7 @@ INSTANT_SIGNATURES = {
 # (ex : un scan de ports est rapide, le beaconing C2 est volontairement lent).
 FREQUENCY_SIGNATURES = {
     "SSH_BRUTE":        (r"(?i)(Failed password)", SSH_BRUTE_THRESHOLD, "CRITICAL", WINDOW_SEC),
+    "FTP_BRUTE":        (r"TYPE=FTP_BRUTE", 5, "CRITICAL", WINDOW_SEC),
     "PORT_SCAN":        (r"(?i)(Nmap|masscan|stealth|SYN_FLOOD)", PORT_SCAN_THRESHOLD, "HIGH", WINDOW_SEC),
     "WEB_ENUMERATION":  (r"TYPE=WEB_ENUMERATION", 20, "MEDIUM", WINDOW_SEC),
     "C2_BEACON":        (r"TYPE=C2_BEACON", 5, "HIGH", 30),
@@ -35,12 +37,14 @@ FREQUENCY_SIGNATURES = {
 # Le mouvement latéral se détecte différemment : ce n'est pas "N fois la même signature",
 # mais "N cibles internes *distinctes* contactées par la même source" -> besoin d'un tracker dédié.
 LATERAL_MOVEMENT_PATTERN = r"TYPE=LATERAL_MOVEMENT"
-LATERAL_MOVEMENT_TARGET_REGEX = r"target ([0-9.]+)"
+# V5 format: "on target 192.168.1.X port 445"
+# V6 format: "on 192.168.1.X:445" (SMB/WMI/RDP) — both handled by this regex
+LATERAL_MOVEMENT_TARGET_REGEX = r"(?:target\s+|on\s+)([0-9]{1,3}(?:\.[0-9]{1,3}){3})"
 LATERAL_MOVEMENT_DISTINCT_TARGET_THRESHOLD = 5
 LATERAL_MOVEMENT_WINDOW_SEC = 10
 
 # Whitelist : IPs internes jamais bannies (évite les faux positifs)
-WHITELIST = {"127.0.0.1"}
+WHITELIST = set()
 
 # Etat en mémoire
 banned_ips = {}              # ip -> timestamp d'expiration du ban
@@ -87,12 +91,18 @@ def ban_ip(ip):
 
 
 def follow(thefile):
-    """Lit le fichier en continu, comme 'tail -f'."""
+    """Lit le fichier en continu, et gère la troncature (vidage du fichier)."""
     thefile.seek(0, 2)
     while True:
         line = thefile.readline()
         if not line:
             time.sleep(0.1)
+            # Vérifie si le fichier a été écrasé/vidé
+            try:
+                if thefile.tell() > os.path.getsize(thefile.name):
+                    thefile.seek(0)
+            except OSError:
+                pass # Sécurité si le fichier est brièvement inaccessible
             continue
         yield line
 
