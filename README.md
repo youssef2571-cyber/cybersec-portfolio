@@ -2,8 +2,6 @@
 
 **Cybersecurity Student | Infrastructure Defense & Security Operations**
 
-Currently finalizing my Bachelor's degree in Cyber Security, I am seeking a 6-month summer internship in Security Operations, Infrastructure Security, or Security Engineering to further develop hands-on expertise. My core focus is on building, hardening, and securing robust network and system infrastructures.
-
 ---
 
 ## 📊 Skills Snapshot
