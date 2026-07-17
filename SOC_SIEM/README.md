@@ -29,7 +29,7 @@ correlation actually work under the hood.
   separately, so they don't drown out genuinely new threats in the stats.
 
 ## 🎯 Attack scenarios covered (Cyber Kill Chain)
-
+![ATTACK SIMULATEUR ](images/Screenshot_20260707_030052.png)
 | Stage | Simulated technique |
 |---|---|
 | Reconnaissance | Port scanning / SYN flood, web directory fuzzing (Gobuster-style) |
