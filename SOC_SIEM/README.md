@@ -49,10 +49,7 @@ correlation actually work under the hood.
 ├── ids_alerts.log            # Alerts emitted by the IDS/IPS engine (created at runtime)
 └── banned_ips.json           # Persisted ban list (created at runtime)
 ```
-
-> English-language versions of the engine, simulator, and advanced dashboard are also
-> available as `*_en.py` / `*_en.sh` files if you'd rather read the code itself in English.
-
+![HONEYNET ](images/Screenshot_20260707_030028.png)
 ## 🚀 Getting started
 
 ### Requirements
@@ -101,7 +98,7 @@ live statistics.
 - Banned IPs are **persisted to disk** and **expire automatically** after a configurable
   duration, so the IPS state survives a restart without permanently blacklisting an IP
   forever.
-
+![ids/ips & SIEM ](images/Screenshot_20260707_030124.png)
 ## ⚠️ Disclaimer
 
 This project is for **educational purposes only**. It runs entirely on local, synthetic log
