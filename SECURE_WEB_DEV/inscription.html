@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Créer un compte - Plateforme d'inscription</title>
+<link rel="stylesheet" href="pfm.css">
+</head>
+<body>
+<nav>
+<a href="login.php">🔑 Se Connecter</a>
+<a href="inscription.html">📝 S'inscrire</a>
+</nav>
+
+<div class="container">
+<h2>Création de compte - Marathon & Événements</h2>
+<form method="POST" action="inscrire_participant.php" enctype="multipart/form-data"> >
+<fieldset>
+<legend>Données Personnelles (Table Utilisateur)</legend>
+<label>Nom * :</label><br>
+<input type="text" name="nom" required><br><br>
+
+<label>Prénom * :</label><br>
+<input type="text" name="prenom" required><br><br>
+
+<label>Email académique (@um5r.ac.ma) * :</label><br>
+<input type="email" name="email" required><br><br>
+
+<label>Login choisi * :</label><br>
+<input type="text" name="login" required><br><br>
+
+<label>Mot de passe * :</label><br>
+<input type="password" name="mdp" required><br><br>
+
+<label>Statut * :</label><br>
+<input type="radio" name="statut" value="Etudiant" required> Étudiant 
+<input type="radio" name="statut" value="Enseignant" required> Enseignant<br><br>
+
+<label>Code étudiant (Requis si tarif réduit étudiant) :</label><br>
+<input type="text" name="code_etudiant"><br><br>
+
+<label>Téléverser votre Justificatif * :</label><br>
+<input type="file" name="justificatif" required>
+</fieldset>
+
+<fieldset style="margin-top:20px;">
+<legend>Centres d'intérêt & Motivations</legend>
+<label>Centres d'intérêt * (Cochez au moins 2) :</label><br>
+<input type="checkbox" name="interets[]" value="Running"> Running / Sport<br>
+<input type="checkbox" name="interets[]" value="Bien-être"> Bien-être<br>
+<input type="checkbox" name="interets[]" value="Scientifique"> Événements scientifiques<br><br>
+
+<label>Motivation :</label><br>
+<textarea name="motivation" rows="4" style="width:100%;"></textarea>
+</fieldset>
+
+<br>
+<input type="submit" value="Créer mon compte">
+</form>
+</div>
+</body>
+</html>
