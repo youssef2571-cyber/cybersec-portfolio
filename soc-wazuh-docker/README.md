@@ -16,7 +16,7 @@ Ce projet fait suite à un Honeynet et un Mini-SIEM développés précédemment 
 - [Détection de vulnérabilités](#détection-de-vulnérabilités-bonus)
 - [Compétences démontrées](#compétences-démontrées)
 - [Pistes d'évolution](#pistes-dévolution)
-
+- [Rapport détaillé](#Rapport-détaillé)
 ---
 
 ## Architecture
@@ -156,4 +156,8 @@ soc-wazuh-docker/
 │       └── 05-webshell-detection.png
 └── report.md
 ```
+---
+## Rapport détaillé
+
+
 📄 Pour une documentation détaillée de la méthodologie (difficultés rencontrées, résolutions, processus de vérification), voir [report.md](report.md).
