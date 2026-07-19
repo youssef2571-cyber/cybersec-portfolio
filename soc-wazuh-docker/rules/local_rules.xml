@@ -1,0 +1,113 @@
+<!-- Local rules -->
+<!-- Modify it at your will. -->
+<!-- Copyright (C) 2015, Wazuh Inc. -->
+
+<!-- ============================================================
+     GROUPE 1 : SSH — Brute force + Compromission confirmée
+     ============================================================ -->
+<group name="local,syslog,sshd,">
+
+  <!-- Brute force basique -->
+  <rule id="100010" level="10" frequency="6" timeframe="60">
+    <if_matched_sid>5716</if_matched_sid>
+    <same_source_ip />
+    <description>SSH brute force: 6 echecs d'authentification en 60 secondes</description>
+    <mitre>
+      <id>T1110</id>
+    </mitre>
+  </rule>
+
+  <!-- NIVEAU 12 : Compromission confirmee -->
+  <rule id="100013" level="12">
+    <if_matched_sid>100010</if_matched_sid>
+    <same_source_ip />
+    <description>COMPROMISSION CONFIRMEE : Authentification SSH reussie apres une serie d'echecs (brute force abouti)</description>
+    <mitre>
+      <id>T1110</id>
+      <id>T1078</id>
+    </mitre>
+  </rule>
+</group>
+
+<!-- ============================================================
+     GROUPE 2 : Reconnaissance
+     ============================================================ -->
+<group name="local,recon,">
+  <rule id="100011" level="8" frequency="10" timeframe="20">
+    <if_matched_sid>31151</if_matched_sid>
+    <same_source_ip />
+    <description>Scan de ports detecte (comportement type Nmap)</description>
+    <mitre>
+      <id>T1046</id>
+    </mitre>
+  </rule>
+</group>
+
+<!-- ============================================================
+     GROUPE 3 : Privilege escalation
+     ============================================================ -->
+<group name="local,privilege_escalation,">
+  <rule id="100012" level="7">
+    <if_sid>5401</if_sid>
+    <description>Utilisation de sudo detectee : surveillance elevation de privileges</description>
+    <mitre>
+      <id>T1548</id>
+    </mitre>
+  </rule>
+</group>
+
+<!-- ============================================================
+     GROUPE 4 : Defense Evasion — Suppression de logs systeme
+     NIVEAU 12 : escalade la regle native 553 (niveau 7, "File deleted")
+     UNIQUEMENT quand le fichier supprime est auth.log ou syslog.
+     Necessite syscheck actif sur /var/log/auth.log et /var/log/syslog
+     dans ossec.conf de l'agent (realtime="yes").
+     ============================================================ -->
+<group name="local,defense_evasion,log_tampering,">
+  <rule id="100014" level="12">
+    <if_sid>553</if_sid>
+    <field name="file">auth\.log|syslog</field>
+    <description>CRITIQUE : Suppression d'un fichier de log systeme (effacement de traces potentiel)</description>
+    <mitre>
+      <id>T1070</id>
+      <id>T1070.002</id>
+    </mitre>
+  </rule>
+</group>
+
+<!-- ============================================================
+     GROUPE 5 : Rootkit / Malware connu
+     NIVEAU 12 : escalade la regle native 521 (niveau 11, deja
+     tres proche de 12). On la fait remonter explicitement a 12
+     pour la faire apparaitre dans "Level 12+ alerts" du dashboard.
+     Necessite rootcheck actif avec frequency reduite .
+     Se declenche via /var/ossec/etc/shared/default/rootkit_files.txt
+     ============================================================ -->
+<group name="local,rootcheck,malware,">
+  <rule id="100016" level="12">
+    <if_sid>521</if_sid>
+    <description>CRITIQUE : Rootkit kernel possible detecte par rootcheck</description>
+    <mitre>
+      <id>T1014</id>
+    </mitre>
+  </rule>
+</group>
+
+<!-- ============================================================
+     GROUPE 6 : Webshell — Depot de fichier suspect dans le webroot
+     NIVEAU 15 (maximum) : depot d'un fichier .php/.sh/.py dans
+     /var/www/html = RCE potentiel = compromission totale.
+     Necessite : un serveur web installe sur la victime (Apache/Nginx)
+     ET /var/www/html surveille par syscheck (realtime="yes").
+     ============================================================ -->
+<group name="local,webshell_detection,">
+  <rule id="100025" level="15">
+    <if_sid>554</if_sid>
+    <field name="file">/var/www/html/</field>
+    <regex>\.php$|\.sh$|\.py$</regex>
+    <description>CRITIQUE : Depot potentiel d'un Webshell dans le repertoire public web</description>
+    <mitre>
+      <id>T1505.003</id>
+    </mitre>
+  </rule>
+</group>
