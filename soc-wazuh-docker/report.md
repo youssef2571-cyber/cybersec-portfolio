@@ -17,7 +17,7 @@ Objectifs concrets :
 
 Le lab est structuré en trois couches (voir `docs/architecture.png`) :
 
-- **Hôte physique** : Parrot OS, 32 Go de RAM, 8 cœurs — largement suffisant pour faire tourner la stack Wazuh en parallèle des VMs de test.
+- **Hôte physique** : Parrot OS, 32 Go de RAM, 8 cœurs.
 - **Couche de virtualisation (QEMU/KVM)** : une VM Kali Linux (attaquant, IP `192.168.122.235`) et une VM Ubuntu Server 24.04 (victime, IP `192.168.122.46`), reliées à un réseau bridge virtuel (`virbr0`, `192.168.122.0/24`).
 - **Infrastructure conteneurisée (Docker Compose)** : Wazuh Manager, Wazuh Indexer (OpenSearch) et Wazuh Dashboard, déployés sur l'hôte.
 
