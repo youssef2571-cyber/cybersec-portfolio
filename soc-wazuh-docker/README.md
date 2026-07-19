@@ -141,15 +141,19 @@ Résultat sur la VM victime : 515 paquets analysés, avec détection de CVE rép
 ```
 soc-wazuh-docker/
 ├── README.md
+├── docker-compose.yml          
 ├── rules/
 │   └── local_rules.xml
 ├── scripts/
 │   └── wazuh_attack_lab.sh
-└── docs/
-    ├── architecture.png
-    └── screenshots/
-        ├── 01-dashboard-overview.png
-        ├── 02-mitre-attack.png
-        ├── 03-level12-alerts.png
-        └── 04-vulnerability-detection.png
+├── docs/
+│   ├── architecture.png        
+│   └── screenshots/
+│       ├── 01-agent-active.png
+│       ├── 02-dashboard-overview.png
+│       ├── 03-mitre-attack-map.png
+│       ├── 04-level12-alerts.png
+│       └── 05-webshell-detection.png
+└── report.md
 ```
+📄 Pour une documentation détaillée de la méthodologie (difficultés rencontrées, résolutions, processus de vérification), voir [report.md](report.md).
