@@ -1,0 +1,28 @@
+version: v3
+teleport:
+nodename: teleport-proxy
+data_dir: /var/lib/teleport
+log:
+output: stderr
+severity: INFO
+
+auth_service:
+enabled: "yes"
+listen_addr: 0.0.0.0:3025
+cluster_name: ztna-lab
+proxy_listener_mode: multiplex
+session_recording: "node"
+authentication:
+type: github
+second_factor: "on"
+webauthn:
+rp_id: teleport.ztna.lab
+proxy_service:
+enabled: "yes"
+web_listen_addr: 0.0.0.0:3080
+https_keypairs:
+- key_file: /etc/teleport/certs/teleport.ztna.lab+2-key.pem
+cert_file: /etc/teleport/certs/teleport.ztna.lab+2.pem
+
+ssh_service:
+enabled: "no"
