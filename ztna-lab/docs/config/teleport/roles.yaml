@@ -1,0 +1,56 @@
+kind: role
+version: v6
+metadata:
+name: ztna-admin
+spec:
+allow:
+logins: ["vm2", "root"]
+node_labels:
+"*": "*"
+options:
+max_session_ttl: "4h"
+---
+kind: role
+version: v6
+metadata:
+name: ztna-dev
+spec:
+allow:
+logins: ["vm2"]
+node_labels:
+env: "dev"
+options:
+max_session_ttl: "2h"
+---
+kind: role
+version: v6
+metadata:
+name: ztna-guest
+spec:
+allow:
+logins: []
+deny:
+node_labels:
+"*": "*"
+options:
+max_session_ttl: "30m"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
