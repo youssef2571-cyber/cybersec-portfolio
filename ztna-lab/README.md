@@ -127,7 +127,6 @@ Le dashboard Wazuh confirme la remontée effective des logs, avec détection de 
 8. Déployer Wazuh Manager sur l'hôte, agent sur VM2
 9. Appliquer les règles de détection personnalisées
 
-Détails complets des commandes dans [`docs/installation-guide.md`](docs/installation-guide.md).
 
 ## Améliorations possibles
 
