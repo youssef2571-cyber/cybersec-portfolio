@@ -1,0 +1,29 @@
+<group name="ztna,teleport,">
+  <rule id="100200" level="5">
+    <decoded_as>json</decoded_as>
+    <field name="event">"user.login"</field>
+    <field name="success">false</field>
+    <description>ZTNA: Echec d'authentification Teleport</description>
+    <mitre>
+      <id>T1110</id>
+    </mitre>
+  </rule>
+
+  <rule id="100201" level="10" frequency="5" timeframe="120">
+    <if_matched_sid>100200</if_matched_sid>
+    <description>ZTNA: Multiples echecs - possible brute force</description>
+    <mitre>
+      <id>T1110</id>
+    </mitre>
+  </rule>
+
+  <rule id="100202" level="7">
+    <decoded_as>json</decoded_as>
+    <field name="event">"session.start"</field>
+    <time>21:00-06:00</time>
+    <description>ZTNA: Acces en dehors des heures normales</description>
+    <mitre>
+      <id>T1078</id>
+    </mitre>
+  </rule>
+</group>
