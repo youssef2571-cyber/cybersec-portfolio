@@ -1,0 +1,18 @@
+services:
+teleport:
+image: public.ecr.aws/gravitational/teleport-distroless:16
+container_name: teleport
+ports:
+- "3080:3080"
+- "3025:3025"
+- "3022:3022"
+environment:
+- SSL_CERT_FILE=/etc/teleport/certs/rootCA.pem
+volumes:
+- ./teleport.yaml:/etc/teleport/teleport.yaml
+- teleport_data:/var/lib/teleport
+- /var/log/teleport:/var/lib/teleport/log
+- ./certs:/etc/teleport/certs
+
+volumes:
+teleport_data:
