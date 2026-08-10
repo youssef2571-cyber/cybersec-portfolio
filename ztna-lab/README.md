@@ -128,14 +128,6 @@ Le dashboard Wazuh confirme la remontée effective des logs, avec détection de 
 9. Appliquer les règles de détection personnalisées
 
 
-## Améliorations possibles
-
-- Device Trust (nécessite Teleport Enterprise) pour une posture Zero Trust complète incluant la confiance machine
-- Haute disponibilité (cluster Teleport multi-nœuds, Wazuh en cluster)
-- Intégration d'une ressource applicative web supplémentaire (Application Access)
-- Automatisation du déploiement via Ansible/Terraform plutôt que configuration manuelle
-- Rotation automatisée des certificats (actuellement mkcert statique, à remplacer par Let's Encrypt ou une PKI interne en production)
-
 ---
 
 **Auteur :** Youssef — [github.com/youssef2571-cyber](https://github.com/youssef2571-cyber)
