@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-16"?>
+<GPO xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.microsoft.com/GroupPolicy/Settings">
+  <Identifier>
+    <Identifier xmlns="http://www.microsoft.com/GroupPolicy/Types">{205CFD71-9800-426A-B497-C917F0744BEF}</Identifier>
+    <Domain xmlns="http://www.microsoft.com/GroupPolicy/Types">corp.lab.local</Domain>
+  </Identifier>
+  <Name>GPO-RH-Restrictions</Name>
+  <IncludeComments>true</IncludeComments>
+  <CreatedTime>2026-09-07T08:26:18</CreatedTime>
+  <ModifiedTime>2026-09-09T08:56:19</ModifiedTime>
+  <ReadTime>2026-09-10T09:06:01.7755952Z</ReadTime>
+  <SecurityDescriptor>
+    <SDDL xmlns="http://www.microsoft.com/GroupPolicy/Types/Security">O:DAG:DAD:PAI(OA;CI;CR;edacfd8f-ffb3-11d1-b41d-00a0c968f939;;AU)(A;;CCDCLCSWRPWPDTLOSDRCWDWO;;;DA)(A;CI;CCDCLCSWRPWPDTLOSDRCWDWO;;;DA)(A;CI;CCDCLCSWRPWPDTLOSDRCWDWO;;;S-1-5-21-1042575232-1635318500-1960372635-519)(A;CI;LCRPLORC;;;ED)(A;CI;LCRPLORC;;;AU)(A;CI;CCDCLCSWRPWPDTLOSDRCWDWO;;;SY)(A;CIIO;CCDCLCSWRPWPDTLOSDRCWDWO;;;CO)S:AI(OU;CIIDSA;WPWD;;f30e3bc2-9ff0-11d1-b603-0000f80367c1;WD)(OU;CIIOIDSA;WP;f30e3bbe-9ff0-11d1-b603-0000f80367c1;bf967aa5-0de6-11d0-a285-00aa003049e2;WD)(OU;CIIOIDSA;WP;f30e3bbf-9ff0-11d1-b603-0000f80367c1;bf967aa5-0de6-11d0-a285-00aa003049e2;WD)</SDDL>
+    <Owner xmlns="http://www.microsoft.com/GroupPolicy/Types/Security">
+      <SID xmlns="http://www.microsoft.com/GroupPolicy/Types">S-1-5-21-1042575232-1635318500-1960372635-512</SID>
+      <Name xmlns="http://www.microsoft.com/GroupPolicy/Types">CORP\Domain Admins</Name>
+    </Owner>
+    <Group xmlns="http://www.microsoft.com/GroupPolicy/Types/Security">
+      <SID xmlns="http://www.microsoft.com/GroupPolicy/Types">S-1-5-21-1042575232-1635318500-1960372635-512</SID>
+      <Name xmlns="http://www.microsoft.com/GroupPolicy/Types">CORP\Domain Admins</Name>
+    </Group>
+    <PermissionsPresent xmlns="http://www.microsoft.com/GroupPolicy/Types/Security">true</PermissionsPresent>
+    <Permissions xmlns="http://www.microsoft.com/GroupPolicy/Types/Security">
+      <InheritsFromParent>false</InheritsFromParent>
+      <TrusteePermissions>
+        <Trustee>
+          <SID xmlns="http://www.microsoft.com/GroupPolicy/Types">S-1-5-9</SID>
+          <Name xmlns="http://www.microsoft.com/GroupPolicy/Types">NT AUTHORITY\ENTERPRISE DOMAIN CONTROLLERS</Name>
+        </Trustee>
+        <Type xsi:type="PermissionType">
+          <PermissionType>Allow</PermissionType>
+        </Type>
+        <Inherited>false</Inherited>
+        <Applicability>
+          <ToSelf>true</ToSelf>
+          <ToDescendantObjects>false</ToDescendantObjects>
+          <ToDescendantContainers>true</ToDescendantContainers>
+          <ToDirectDescendantsOnly>false</ToDirectDescendantsOnly>
+        </Applicability>
+        <Standard>
+          <GPOGroupedAccessEnum>Read</GPOGroupedAccessEnum>
+        </Standard>
+        <AccessMask>0</AccessMask>
+      </TrusteePermissions>
+      <TrusteePermissions>
+        <Trustee>
+          <SID xmlns="http://www.microsoft.com/GroupPolicy/Types">S-1-5-21-1042575232-1635318500-1960372635-519</SID>
+          <Name xmlns="http://www.microsoft.com/GroupPolicy/Types">CORP\Enterprise Admins</Name>
+        </Trustee>
+        <Type xsi:type="PermissionType">
+          <PermissionType>Allow</PermissionType>
+        </Type>
+        <Inherited>false</Inherited>
+        <Applicability>
+          <ToSelf>true</ToSelf>
+          <ToDescendantObjects>false</ToDescendantObjects>
+          <ToDescendantContainers>true</ToDescendantContainers>
+          <ToDirectDescendantsOnly>false</ToDirectDescendantsOnly>
+        </Applicability>
+        <Standard>
+          <GPOGroupedAccessEnum>Edit, delete, modify security</GPOGroupedAccessEnum>
+        </Standard>
+        <AccessMask>0</AccessMask>
+      </TrusteePermissions>
+      <TrusteePermissions>
+        <Trustee>
+          <SID xmlns="http://www.microsoft.com/GroupPolicy/Types">S-1-5-18</SID>
+          <Name xmlns="http://www.microsoft.com/GroupPolicy/Types">NT AUTHORITY\SYSTEM</Name>
+        </Trustee>
+        <Type xsi:type="PermissionType">
+          <PermissionType>Allow</PermissionType>
+        </Type>
+        <Inherited>false</Inherited>
+        <Applicability>
+          <ToSelf>true</ToSelf>
+          <ToDescendantObjects>false</ToDescendantObjects>
+          <ToDescendantContainers>true</ToDescendantContainers>
+          <ToDirectDescendantsOnly>false</ToDirectDescendantsOnly>
+        </Applicability>
+        <Standard>
+          <GPOGroupedAccessEnum>Edit, delete, modify security</GPOGroupedAccessEnum>
+        </Standard>
+        <AccessMask>0</AccessMask>
+      </TrusteePermissions>
+      <TrusteePermissions>
+        <Trustee>
+          <SID xmlns="http://www.microsoft.com/GroupPolicy/Types">S-1-5-11</SID>
+          <Name xmlns="http://www.microsoft.com/GroupPolicy/Types">NT AUTHORITY\Authenticated Users</Name>
+        </Trustee>
+        <Type xsi:type="PermissionType">
+          <PermissionType>Allow</PermissionType>
+        </Type>
+        <Inherited>false</Inherited>
+        <Applicability>
+          <ToSelf>true</ToSelf>
+          <ToDescendantObjects>false</ToDescendantObjects>
+          <ToDescendantContainers>true</ToDescendantContainers>
+          <ToDirectDescendantsOnly>false</ToDirectDescendantsOnly>
+        </Applicability>
+        <Standard>
+          <GPOGroupedAccessEnum>Apply Group Policy</GPOGroupedAccessEnum>
+        </Standard>
+        <AccessMask>0</AccessMask>
+      </TrusteePermissions>
+      <TrusteePermissions>
+        <Trustee>
+          <SID xmlns="http://www.microsoft.com/GroupPolicy/Types">S-1-5-21-1042575232-1635318500-1960372635-512</SID>
+          <Name xmlns="http://www.microsoft.com/GroupPolicy/Types">CORP\Domain Admins</Name>
+        </Trustee>
+        <Type xsi:type="PermissionType">
+          <PermissionType>Allow</PermissionType>
+        </Type>
+        <Inherited>false</Inherited>
+        <Applicability>
+          <ToSelf>true</ToSelf>
+          <ToDescendantObjects>false</ToDescendantObjects>
+          <ToDescendantContainers>true</ToDescendantContainers>
+          <ToDirectDescendantsOnly>false</ToDirectDescendantsOnly>
+        </Applicability>
+        <Standard>
+          <GPOGroupedAccessEnum>Edit, delete, modify security</GPOGroupedAccessEnum>
+        </Standard>
+        <AccessMask>0</AccessMask>
+      </TrusteePermissions>
+    </Permissions>
+    <AuditingPresent xmlns="http://www.microsoft.com/GroupPolicy/Types/Security">false</AuditingPresent>
+  </SecurityDescriptor>
+  <FilterDataAvailable>true</FilterDataAvailable>
+  <Computer>
+    <VersionDirectory>1</VersionDirectory>
+    <VersionSysvol>1</VersionSysvol>
+    <Enabled>true</Enabled>
+    <ExtensionData>
+      <Extension xmlns:q1="http://www.microsoft.com/GroupPolicy/Settings/Registry" xsi:type="q1:RegistrySettings">
+        <q1:Policy>
+          <q1:Name>Always wait for the network at computer startup and logon</q1:Name>
+          <q1:State>Enabled</q1:State>
+          <q1:Explain>This policy setting determines whether Group Policy processing is synchronous (that is, whether computers wait for the network to be fully initialized during computer startup and user logon). By default, on client computers, Group Policy processing is not synchronous; client computers typically do not wait for the network to be fully initialized at startup and logon. Existing users are logged on using cached credentials, which results in shorter logon times. Group Policy is applied in the background after the network becomes available. 
+
+Note that because this is a background refresh, extensions such as Software Installation and Folder Redirection take two logons to apply changes. To be able to operate safely, these extensions require that no users be logged on. Therefore, they must be processed in the foreground before users are actively using the computer. In addition, changes that are made to the user object, such as adding a roaming profile path, home directory, or user object logon script, may take up to two logons to be detected.
+
+If a user with a roaming profile, home directory, or user object logon script logs on to a computer, computers always wait for the network to be initialized before logging the user on. If a user has never logged on to this computer before, computers always wait for the network to be initialized.
+
+If you enable this policy setting, computers wait for the network to be fully initialized before users are logged on. Group Policy is applied in the foreground, synchronously. 
+
+On servers running Windows Server 2008 or later, this policy setting is ignored during Group Policy processing at computer startup and Group Policy processing will be synchronous (these servers wait for the network to be initialized during computer startup). 
+
+If the server is configured as follows, this policy setting takes effect during Group Policy processing at user logon:
+•  The server is configured as a terminal server (that is, the Terminal Server role service is installed and configured on the server); and
+•  The “Allow asynchronous user Group Policy processing when logging on through Terminal Services” policy setting is enabled. This policy setting is located under Computer Configuration\Policies\Administrative templates\System\Group Policy\.
+
+If this configuration is not implemented on the server, this policy setting is ignored. In this case, Group Policy processing at user logon is synchronous (these servers wait for the network to be initialized during user logon).
+
+If you disable or do not configure this policy setting and users log on to a client computer or a server running Windows Server 2008 or later and that is configured as described earlier, the computer typically does not wait for the network to be fully initialized. In this case, users are logged on with cached credentials. Group Policy is applied asynchronously in the background.
+
+Notes: 
+-If you want to guarantee the application of Folder Redirection, Software Installation, or roaming user profile settings in just one logon, enable this policy setting to ensure that Windows waits for the network to be available before applying policy. 
+-If Folder Redirection policy will apply during the next logon, security policies will be applied asynchronously during the next update cycle, if network connectivity is available.</q1:Explain>
+          <q1:Supported>At least Windows Server 2003 operating systems or Windows XP Professional</q1:Supported>
+          <q1:Category>System/Logon</q1:Category>
+        </q1:Policy>
+        <q1:Blocked>false</q1:Blocked>
+      </Extension>
+      <Name>Registry</Name>
+    </ExtensionData>
+  </Computer>
+  <User>
+    <VersionDirectory>6</VersionDirectory>
+    <VersionSysvol>6</VersionSysvol>
+    <Enabled>true</Enabled>
+    <ExtensionData>
+      <Extension xmlns:q2="http://www.microsoft.com/GroupPolicy/Settings/FolderRedirection" xsi:type="q2:FolderRedirectionSettings">
+        <q2:Folder>
+          <q2:Id>{FDD39AD0-238F-46AF-ADB4-6C85480369C7}</q2:Id>
+          <q2:Location>
+            <q2:DestinationPath>\\srv-file\Redirect$\%USERNAME%\Documents</q2:DestinationPath>
+            <q2:SecurityGroup>
+              <SID xmlns="http://www.microsoft.com/GroupPolicy/Types">s-1-1-0</SID>
+              <Name xmlns="http://www.microsoft.com/GroupPolicy/Types">Everyone</Name>
+            </q2:SecurityGroup>
+          </q2:Location>
+          <q2:GrantExclusiveRights>true</q2:GrantExclusiveRights>
+          <q2:MoveContents>true</q2:MoveContents>
+          <q2:FollowParent>false</q2:FollowParent>
+          <q2:ApplyToDownLevel>false</q2:ApplyToDownLevel>
+          <q2:DoNotCare>false</q2:DoNotCare>
+          <q2:RedirectToLocal>false</q2:RedirectToLocal>
+          <q2:PolicyRemovalBehavior>LeaveContents</q2:PolicyRemovalBehavior>
+          <q2:ConfigurationControl>GP</q2:ConfigurationControl>
+          <q2:PrimaryComputerEvaluation>PrimaryComputerPolicyDisabled</q2:PrimaryComputerEvaluation>
+        </q2:Folder>
+      </Extension>
+      <Name>Folder Redirection</Name>
+    </ExtensionData>
+    <ExtensionData>
+      <Extension xmlns:q3="http://www.microsoft.com/GroupPolicy/Settings/DriveMaps" xsi:type="q3:DriveMapSettings">
+        <q3:DriveMapSettings clsid="{8FDDCC1A-0C3C-43cd-A6B4-71A6DF20DA8C}">
+          <q3:Drive clsid="{935D1B74-9CB8-4e3c-9914-7DD559B7A417}" name="H:" status="H:" image="2" changed="2026-09-09 08:18:16" uid="{C189E0B0-36A9-49A3-8761-1B6AC2DFA2C1}">
+            <q3:GPOSettingOrder>1</q3:GPOSettingOrder>
+            <q3:Properties action="U" thisDrive="NOCHANGE" allDrives="NOCHANGE" userName="" path="\\srv-file\Partage-RH$" label="Commun RH" persistent="1" useLetter="1" letter="H" />
+            <q3:Filters />
+          </q3:Drive>
+        </q3:DriveMapSettings>
+      </Extension>
+      <Name>Drive Maps</Name>
+    </ExtensionData>
+    <ExtensionData>
+      <Extension xmlns:q4="http://www.microsoft.com/GroupPolicy/Settings/Registry" xsi:type="q4:RegistrySettings">
+        <q4:Policy>
+          <q4:Name>Prohibit access to Control Panel and PC settings</q4:Name>
+          <q4:State>Enabled</q4:State>
+          <q4:Explain>Disables all Control Panel programs and the PC settings app.
+
+This setting prevents Control.exe and SystemSettings.exe, the program files for Control Panel and PC settings, from starting. As a result, users cannot start Control Panel or PC settings, or run any of their items.
+
+This setting removes Control Panel from:
+The Start screen
+File Explorer
+
+This setting removes PC settings from:
+The Start screen
+Settings charm
+Account picture
+Search results
+
+If users try to select a Control Panel item from the Properties item on a context menu, a message appears explaining that a setting prevents the action.</q4:Explain>
+          <q4:Supported>At least Windows 2000</q4:Supported>
+          <q4:Category>Control Panel</q4:Category>
+        </q4:Policy>
+        <q4:Blocked>false</q4:Blocked>
+      </Extension>
+      <Name>Registry</Name>
+    </ExtensionData>
+  </User>
+  <LinksTo>
+    <SOMName>RH</SOMName>
+    <SOMPath>corp.lab.local/CORP-FR/RH</SOMPath>
+    <Enabled>true</Enabled>
+    <NoOverride>false</NoOverride>
+  </LinksTo>
+</GPO>
