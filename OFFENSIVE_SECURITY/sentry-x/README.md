@@ -2,7 +2,7 @@
   <img src="docs/assets/logo.svg" alt="SENTRY-X logo" width="420">
 </p>
 
-# SENTRY-X V1
+# SENTRY-X
 
 AI-assisted reconnaissance and vulnerability analysis CLI for **authorized**
 penetration testing. Runs standard recon tools (nmap, whois, whatweb, dig,
@@ -110,6 +110,12 @@ docker compose run --rm app sentryx scan --target scanme.nmap.org \
 See **RUNBOOK.md** for the full command reference, rollback procedure, and
 acceptance checklist.
 
+## What's verified vs. what isn't
+
+This was built and tested inside a sandboxed Linux container with network
+access limited to PyPI/GitHub/Ubuntu's package mirrors - **not** general
+internet access, and no live Docker daemon. See **VERIFICATION.md** for the
+precise, honest list of what was actually run and what wasn't.
 
 ## Scope note: exploitation modules
 

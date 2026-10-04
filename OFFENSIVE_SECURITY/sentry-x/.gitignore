@@ -1,0 +1,32 @@
+# Secrets - never commit
+.env
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+venv/
+.venv/
+build/
+dist/
+
+# Test / coverage artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# Scan output / reports (may contain sensitive findings)
+reports/
+*.pdf
+!docs/*.pdf
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-24.04
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: sentryx_test
+          POSTGRES_PASSWORD: testpass123
+          POSTGRES_DB: sentryx_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U sentryx_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      SENTRYX_TEST_DB_HOST: localhost
+      SENTRYX_TEST_DB_PORT: 5432
+      SENTRYX_TEST_DB_NAME: sentryx_test
+      SENTRYX_TEST_DB_USER: sentryx_test
+      SENTRYX_TEST_DB_PASSWORD: testpass123
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+          pip install -e .
+
+      - name: Apply DB migration to test database
+        run: |
+          PGPASSWORD=testpass123 psql -h localhost -U sentryx_test -d sentryx_test \
+            -f migrations/001_init.sql
+
+      - name: Lint - flake8
+        run: flake8 src/ tests/
+
+      - name: Format check - black
+        run: black --check --line-length 100 src/ tests/
+
+      - name: Type check - mypy
+        run: mypy src/sentryx/
+
+      - name: Security scan - bandit
+        run: bandit -r src/ -q
+
+      - name: Dependency vulnerability scan - pip-audit
+        run: |
+          pip install --quiet pip-audit
+          pip-audit -r requirements.txt
+
+      - name: Run tests with coverage
+        run: pytest tests/ -v --cov=sentryx --cov-report=xml --cov-report=term-missing
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  docker-build:
+    runs-on: ubuntu-24.04
+    needs: lint-and-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t sentryx:ci-${{ github.sha }} .
+
+      - name: Smoke test image
+        run: docker run --rm sentryx:ci-${{ github.sha }} --help

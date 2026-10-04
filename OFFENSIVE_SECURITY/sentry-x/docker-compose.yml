@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${SENTRYX_DB_NAME:-sentryx}
+      POSTGRES_USER: ${SENTRYX_DB_USER:-sentryx}
+      POSTGRES_PASSWORD: ${SENTRYX_DB_PASSWORD:?set SENTRYX_DB_PASSWORD in .env}
+    volumes:
+      - sentryx_pgdata:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${SENTRYX_DB_USER:-sentryx}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SENTRYX_DB_HOST: db
+      SENTRYX_DB_PORT: 5432
+      SENTRYX_DB_NAME: ${SENTRYX_DB_NAME:-sentryx}
+      SENTRYX_DB_USER: ${SENTRYX_DB_USER:-sentryx}
+      SENTRYX_DB_PASSWORD: ${SENTRYX_DB_PASSWORD:?set SENTRYX_DB_PASSWORD in .env}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:?set ANTHROPIC_API_KEY in .env}
+      SENTRYX_MODEL: ${SENTRYX_MODEL:-claude-sonnet-4-6}
+    stdin_open: true
+    tty: true
+    # NET_RAW/NET_ADMIN are required for some nmap scan types (e.g. SYN
+    # scans with -sS). Omit this if you only need TCP connect scans.
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+
+volumes:
+  sentryx_pgdata:

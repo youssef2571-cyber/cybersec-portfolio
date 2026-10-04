@@ -1,0 +1,7 @@
+anthropic==1.11.0
+click==8.5.0
+rich==15.0.0
+psycopg2-binary==2.9.13
+requests==2.34.2
+python-dotenv==1.2.4
+weasyprint==70.0
