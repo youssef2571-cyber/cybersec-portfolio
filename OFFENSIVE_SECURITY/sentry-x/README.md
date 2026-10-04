@@ -35,7 +35,7 @@ try to proceed without one.
 
 All dependency versions are pinned in `requirements.txt` /
 `requirements-dev.txt`, resolved against the latest stable PyPI release as of
-2026-10-04. See **VERIFICATION.md** for exactly what was tested and how.
+2026-10-04. 
 
 ## Project layout
 
