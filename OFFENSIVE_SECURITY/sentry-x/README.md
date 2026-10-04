@@ -11,6 +11,7 @@ analysis, and stores findings in PostgreSQL with HTML/PDF reporting.
 
 Built as a portfolio project by Youssef Hadeg.
 
+
 ## ⚠️ Authorization requirement
 
 **Only scan systems you own or have explicit written authorization to test.**
