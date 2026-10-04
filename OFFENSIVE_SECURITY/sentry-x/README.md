@@ -111,14 +111,6 @@ docker compose run --rm app sentryx scan --target scanme.nmap.org \
 See **RUNBOOK.md** for the full command reference, rollback procedure, and
 acceptance checklist.
 
-## Scope note: exploitation modules
-
-SENTRY-X currently covers **recon + AI analysis + reporting** only. A
-Metasploit-integration module for assisted exploitation was intentionally
-left out of this delivery - it needs to be built and tested against your own
-GNS3/lab environment rather than a generic container, so testing it here
-would have produced untested code dressed up as verified code.
-
 ## License
 
 MIT - see `LICENSE`.
