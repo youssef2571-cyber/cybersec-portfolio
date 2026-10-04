@@ -91,7 +91,7 @@ sentryx check
 # 6. Run a scan (against a host you're authorized to test)
 sentryx scan --target scanme.nmap.org \
     --authorization-ref "nmap.org public test host" \
-    --authorized-by "Youssef Hadeg"
+    --authorized-by "  "
 
 # 7. List past scans / generate a report
 sentryx list
