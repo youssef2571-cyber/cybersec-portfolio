@@ -4,7 +4,7 @@
 
 ### Cybersecurity Graduate · SOC / Blue Team / Security Engineering
 
-📍 Rabat, Morocco &nbsp;|&nbsp; 🟢 **Available immediately for an internship**
+📍 Rabat, Morocco · open to Casablanca and surrounding areas, or remote &nbsp;|&nbsp; 🟢 **Available immediately for an internship**
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-youssef--hadeg-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/youssef-hadeg-248a76247/)
 [![Email](https://img.shields.io/badge/Email-Contact_me-EA4335?style=for-the-badge&logo=gmail&logoColor=white)](mailto:youssefelhadeg2002@gmail.com)
@@ -29,7 +29,7 @@ This repository holds **12 documented projects**, mostly lab builds on KVM/QEMU 
 
 | 🎯 Target roles | 📅 Availability | 🌍 Location |
 |---|---|---|
-| SOC Analyst Intern · Blue Team · Security Engineer Intern | Immediately | Rabat or remote |
+| SOC Analyst Intern · Blue Team · Security Engineer Intern | Immediately | Rabat, Casablanca and surrounding areas, or remote |
 
 ---
 
@@ -127,7 +127,7 @@ Orchestrates Nmap, whois, WhatWeb, dig, curl and Nikto, analyzes the output with
 
 ## 📬 Contact
 
-I am looking for an internship in **SOC, Blue Team or Security Engineering**, in Rabat or remote.
+I am looking for an internship in **SOC, Blue Team or Security Engineering**, in Rabat, Casablanca and surrounding areas, or remote.
 
 - 📧 Email: [youssefelhadeg2002@gmail.com](mailto:youssefelhadeg2002@gmail.com)
 - 💼 LinkedIn: [youssef-hadeg-248a76247](https://www.linkedin.com/in/youssef-hadeg-248a76247/)
